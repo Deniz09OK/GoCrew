@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  frontend:
+    build: ./Gocrew backend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - Gocrew backend
+
+  backend:
+    build: ./Gocrew backend
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://user:pass@db:5432/gocrew
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: gocrew
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
