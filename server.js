@@ -1,16 +1,27 @@
-const express = require("express");
+const express = require('express');
 const app = express();
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+const authRoutes = require('./src/routes/auth.routes');
 
-const port = process.env.PORT || 5000;
+require('dotenv').config();
 
-app.get("/", (req, res) => {
-  return res.status(200).send({
-    message: "Hello World!",
-  });
+const bcrypt = require('bcrypt');
+bcrypt.hash('votreMotDePasse', 10).then(console.log);
+
+app.use(express.json());
+app.use('/api/auth', authRoutes);
+
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/login.html');
 });
 
-app.listen(port, () => {
-  console.log("Listening on " + port);
+app.get('/register', (req, res) => {
+    res.sendFile(__dirname + '/register.html');
 });
 
-module.exports = app;
+// Socket handler
+require('./src/socket/handler')(io);
+
+const PORT = process.env.PORT || 3000;
+http.listen(PORT, () => console.log(`Serveur lancé sur le port ${PORT}`));
