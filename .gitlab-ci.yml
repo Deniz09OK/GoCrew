@@ -1,8 +1,30 @@
+image: node:18
 
 stages:
-  - check
+  - install
+  - test
+  - build
 
-check:
-  stage: check
+variables:
+  DATABASE_URL: "postgresql://postgres:admin@db:5432/gocrew"
+  JWT_SECRET: "uneSuperCleSecretePourSignerLesTokens"
+  PORT: 3000
+
+install_dependencies:
+  stage: install
   script:
-    - echo "CI/CD ready for GoCrew ✅"
+    - npm install
+  artifacts:
+    paths:
+      - node_modules/
+
+docker_build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker info
+  script:
+    - docker build -f src/Dockerfile -t gocrew-app .
+
