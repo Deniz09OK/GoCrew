@@ -14,7 +14,7 @@
     <h2>Connexion</h2>
     <div id="error"></div>
     <form id="loginForm">
-        <input type="email" id="email" placeholder="Email" required><br>
+        <input type="text" id="username" placeholder="Nom d'utilisateur" required><br>
         <input type="password" id="password" placeholder="Mot de passe" required><br>
         <button type="submit">Se connecter</button>
     </form>
@@ -22,18 +22,18 @@
     <script>
         document.getElementById('loginForm').onsubmit = async function(e) {
             e.preventDefault();
-            const email = document.getElementById('email').value;
+            const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             try {
                 const res = await fetch('http://localhost:3000/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ username, password })
                 });
                 const data = await res.json();
                 if (res.ok) {
                     localStorage.setItem('token', data.token);
-                    window.location = '/'; // Redirigez où vous voulez
+                    window.location = '/welcome'; 
                 } else {
                     document.getElementById('error').innerText = data.error || 'Erreur de connexion';
                 }

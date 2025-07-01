@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription GoCrew</title>
     <style>
         #error { color: red; }
@@ -16,6 +17,7 @@
         <input type="email" id="email" placeholder="Email" required><br>
         <input type="text" id="username" placeholder="Nom d'utilisateur"><br>
         <input type="password" id="password" placeholder="Mot de passe" required><br>
+        <input type="text" id="avatar_url" placeholder="URL de l'avatar (optionnel)"><br>
         <button type="submit">S'inscrire</button>
     </form>
     <a href="/">Déjà un compte ? Se connecter</a>
@@ -25,11 +27,12 @@
             const email = document.getElementById('email').value;
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const avatar_url = document.getElementById('avatar_url').value;
             try {
                 const res = await fetch('http://localhost:3000/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, username })
+                    body: JSON.stringify({ email, password, username, avatar_url })
                 });
                 const data = await res.json();
                 if (res.ok) {

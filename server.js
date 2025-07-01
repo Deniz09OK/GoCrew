@@ -7,7 +7,7 @@ const authRoutes = require('./src/routes/auth.routes');
 require('dotenv').config();
 
 const bcrypt = require('bcrypt');
-bcrypt.hash('votreMotDePasse', 10).then(console.log);
+bcrypt.hash('votreMotDePasse', 10);
 
 app.use(express.json());
 app.use('/api/auth', authRoutes);
@@ -20,7 +20,10 @@ app.get('/register', (req, res) => {
     res.sendFile(__dirname + '/register.html');
 });
 
-// Socket handler
+app.get('/welcome', (req, res) => {
+    res.sendFile(__dirname + '/welcome.html');
+});
+
 require('./src/socket/handler')(io);
 
 const PORT = process.env.PORT || 3000;

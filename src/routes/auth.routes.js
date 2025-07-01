@@ -4,15 +4,21 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+require('dotenv').config();
+
+const connectionString = process.env.DATABASE_URL;
+console.log('DATABASE_URL chargée :', connectionString);
+
+const pool = new Pool({ connectionString });
 
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password)
-        return res.status(400).json({ error: 'Email et mot de passe requis.' });
+    console.log('POST /login body:', req.body);
+    const { username, password } = req.body;
+    if (!username || !password)
+        return res.status(400).json({ error: 'Nom d\'utilisateur et mot de passe requis.' });
 
     try {
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
         if (result.rows.length === 0)
             return res.status(401).json({ error: 'Utilisateur non trouvé.' });
 
@@ -21,7 +27,7 @@ router.post('/login', async (req, res) => {
         if (!valid)
             return res.status(401).json({ error: 'Mot de passe incorrect.' });
 
-        const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ id: user.id, email: user.email, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1d' });
         res.json({ token, user: { id: user.id, email: user.email, username: user.username } });
     } catch (err) {
         console.error('Erreur serveur:', err);
@@ -31,24 +37,24 @@ router.post('/login', async (req, res) => {
 
 router.post('/register', async (req, res) => {
     console.log('POST /register body:', req.body); 
-    const { email, password, username } = req.body;
+    const { email, password, username, avatar_url } = req.body;
     if (!email || !password)
         return res.status(400).json({ error: 'Email et mot de passe requis.' });
 
     try {
         const hash = await bcrypt.hash(password, 10);
         const result = await pool.query(
-            'INSERT INTO users (email, password_hash, username) VALUES ($1, $2, $3) RETURNING id, email, username',
-            [email, hash, username || null]
+            'INSERT INTO users (email, password_hash, username, avatar_url) VALUES ($1, $2, $3, $4) RETURNING id, email, username, role, avatar_url',
+            [email, hash, username || null, avatar_url || null]
         );
-        console.log('Résultat insertion:', result.rows); // Ajout du log
+        console.log('Résultat insertion:', result.rows); 
         res.status(201).json({ user: result.rows[0] });
     } catch (err) {
-        console.error('Erreur serveur register:', err); // Log complet
+        console.error('Erreur serveur register:', err.message, err.stack);
         if (err.code === '23505') {
             res.status(409).json({ error: 'Email déjà utilisé.' });
         } else {
-            res.status(500).json({ error: 'Erreur serveur.' });
+            res.status(500).json({ error: 'Erreur serveur: ' + err.message });
         }
     }
 });
