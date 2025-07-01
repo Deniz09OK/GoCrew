@@ -1,0 +1,8 @@
+
+stages:
+  - check
+
+check:
+  stage: check
+  script:
+    - echo "CI/CD ready for GoCrew ✅"
