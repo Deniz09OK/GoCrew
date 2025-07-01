@@ -102,7 +102,3 @@ CREATE TABLE tasks (
     due_date DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-
-
- 
