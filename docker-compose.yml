@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: gocrew-db
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - gocrew_data:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: .
+      dockerfile: src/Dockerfile
+    container_name: gocrew-web
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  gocrew_data:
