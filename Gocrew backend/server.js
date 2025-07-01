@@ -1,16 +1,19 @@
 const express = require('express');
+const db = require('./src/models/db'); // Assurez-vous que le chemin est correct
 const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
-const authRoutes = require('./src/routes/auth.routes');
-
-require('dotenv').config();
 
 app.use(express.json());
-app.use('/api/auth', authRoutes);
 
-// Socket handler
-require('./src/socket/handler')(io);
+app.get('/test-db', async (req, res) => {
+    try {
+        const result = await db.query('SELECT NOW()');
+        res.json({ success: true, now: result.rows[0].now });
+    } catch (err) {
+        console.error('Erreur PostgreSQL :', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
 
-const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => console.log(`Serveur lancé sur le port ${PORT}`));
+app.listen(3000, () => {
+    console.log('✅ Serveur lancé sur http://localhost:3000');
+});
