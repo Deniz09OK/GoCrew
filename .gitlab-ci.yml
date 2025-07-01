@@ -2,29 +2,21 @@ image: node:18
 
 stages:
   - install
-  - test
   - build
 
-variables:
-  DATABASE_URL: "postgresql://postgres:admin@db:5432/gocrew"
-  JWT_SECRET: "uneSuperCleSecretePourSignerLesTokens"
-  PORT: 3000
+before_script:
+  - echo "DATABASE_URL=$DATABASE_URL" >> .env
+  - echo "JWT_SECRET=$JWT_SECRET" >> .env
+  - echo "PORT=$PORT" >> .env
+  - cat .env
 
-install_dependencies:
+install:
   stage: install
   script:
     - npm install
-  artifacts:
-    paths:
-      - node_modules/
 
-docker_build:
+build:
   stage: build
-  image: docker:latest
-  services:
-    - docker:dind
-  before_script:
-    - docker info
   script:
-    - docker build -f src/Dockerfile -t gocrew-app .
+    - echo "
 
