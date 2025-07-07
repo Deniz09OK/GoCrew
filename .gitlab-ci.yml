@@ -1,18 +1,25 @@
-
 image: node:18
+
 stages:
   - install
   - build
+
 before_script:
+  # Reconstruit le .env à partir des variables GitLab CI/CD
   - echo "DATABASE_URL=$DATABASE_URL" >> .env
   - echo "JWT_SECRET=$JWT_SECRET" >> .env
   - echo "PORT=$PORT" >> .env
+  - echo ".env reconstruit :"
   - cat .env
+
 install:
   stage: install
   script:
     - npm install
+
 build:
   stage: build
   script:
-    - echo "
+    - node -v
+    - npm -v
+    - echo "Build OK"
