@@ -1,22 +1,18 @@
-image: node:18
 
+image: node:18
 stages:
   - install
   - build
-
 before_script:
   - echo "DATABASE_URL=$DATABASE_URL" >> .env
   - echo "JWT_SECRET=$JWT_SECRET" >> .env
   - echo "PORT=$PORT" >> .env
   - cat .env
-
 install:
   stage: install
   script:
     - npm install
-
 build:
   stage: build
   script:
     - echo "
-

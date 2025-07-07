@@ -13,6 +13,7 @@
     <h2>Inscription</h2>
     <div id="error"></div>
     <div id="success"></div>
+    <!-- Formulaire d'inscription -->
     <form id="registerForm">
         <input type="email" id="email" placeholder="Email" required><br>
         <input type="text" id="username" placeholder="Nom d'utilisateur"><br>
@@ -20,8 +21,10 @@
         <input type="text" id="avatar_url" placeholder="URL de l'avatar (optionnel)"><br>
         <button type="submit">S'inscrire</button>
     </form>
+    <!-- Lien vers la page de connexion -->
     <a href="/">Déjà un compte ? Se connecter</a>
     <script>
+        // Gestion de la soumission du formulaire d'inscription
         document.getElementById('registerForm').onsubmit = async function(e) {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -29,6 +32,7 @@
             const password = document.getElementById('password').value;
             const avatar_url = document.getElementById('avatar_url').value;
             try {
+                // Envoie une requête POST à l'API d'inscription
                 const res = await fetch('http://localhost:3000/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -36,13 +40,16 @@
                 });
                 const data = await res.json();
                 if (res.ok) {
+                    // Affiche le succès
                     document.getElementById('success').innerText = "Inscription réussie ! Connectez-vous.";
                     document.getElementById('error').innerText = "";
                 } else {
+                    // Affiche l'erreur d'inscription
                     document.getElementById('error').innerText = data.error || 'Erreur lors de l\'inscription';
                     document.getElementById('success').innerText = "";
                 }
             } catch (err) {
+                // Affiche une erreur réseau
                 document.getElementById('error').innerText = 'Erreur réseau : ' + err;
                 document.getElementById('success').innerText = "";
             }

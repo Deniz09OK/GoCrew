@@ -13,18 +13,22 @@
 <body>
     <h2>Connexion</h2>
     <div id="error"></div>
+    <!-- Formulaire de connexion -->
     <form id="loginForm">
         <input type="text" id="username" placeholder="Nom d'utilisateur" required><br>
         <input type="password" id="password" placeholder="Mot de passe" required><br>
         <button type="submit">Se connecter</button>
     </form>
+    <!-- Lien vers la page d'inscription -->
     <a href="/register"><button type="button">Inscription</button></a>
     <script>
+        // Gestion de la soumission du formulaire de connexion
         document.getElementById('loginForm').onsubmit = async function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             try {
+                // Envoie une requête POST à l'API de login
                 const res = await fetch('http://localhost:3000/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -32,12 +36,15 @@
                 });
                 const data = await res.json();
                 if (res.ok) {
+                    // Stocke le token et redirige vers la page d'accueil
                     localStorage.setItem('token', data.token);
                     window.location = '/welcome'; 
                 } else {
+                    // Affiche l'erreur de connexion
                     document.getElementById('error').innerText = data.error || 'Erreur de connexion';
                 }
             } catch (err) {
+                // Affiche une erreur réseau
                 document.getElementById('error').innerText = 'Erreur réseau : ' + err;
                 console.error('Erreur fetch:', err);
             }
