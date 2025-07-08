@@ -1,9 +1,12 @@
-image: node:18
+image: node:20
 
 stages:
-  - install
-  - build
-  - docker
+  - install_backend
+  - install_frontend
+  - build_backend
+  - build_frontend
+  - docker_backend
+  - docker_frontend
 
 
 before_script:
@@ -14,25 +17,46 @@ before_script:
   - echo ".env reconstruit :"
   - cat .env
 
-install:
-  stage: install
+install_backend:
+  stage: install_backend
   script:
+    - cd Gocrew_backend/src
     - npm install
 
-build:
-  stage: build
+install_frontend:
+  stage: install_frontend
   script:
-    - node -v
-    - npm -v
-    - echo "Build OK"
+    - cd Gocrew_frontend
+    - npm install
 
+build_backend:
+  stage: build_backend
+  script:
+    - cd Gocrew_backend/src
+    - npm run build || echo "Aucune étape de construction pour le backend"
 
-docker-build:
-  stage: docker
+build_frontend:
+  stage: build_frontend
+  script:
+    - cd Gocrew_frontend
+    - npm run build
+
+docker-build-backend:
+  stage: docker_backend
   image: docker:latest
   services:
     - docker:dind
   script:
     - docker info
-    - docker build -f src/Dockerfile -t $CI_REGISTRY_IMAGE:latest .
-    - echo "Image Docker buildée"
+    - docker build -f Gocrew_backend/src/Dockerfile -t $CI_REGISTRY_IMAGE-backend:latest .
+    - echo "Image Docker backend buildée"
+
+docker-build-frontend:
+  stage: docker_frontend
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker info
+    - docker build -f Gocrew_frontend/Dockerfile -t $CI_REGISTRY_IMAGE-frontend:latest ./Gocrew_frontend
+    - echo "Image Docker frontend buildée"
