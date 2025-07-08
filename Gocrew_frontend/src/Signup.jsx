@@ -2,48 +2,38 @@ import { useEffect, useState } from "react";
 import backgroundImage from "./assets/background_auth.png";
 import { Link, useNavigate } from "react-router-dom";
 
-import Cookies from "js-cookie"; // pour manipuler les cookies (non utilisé ici)
-import BrandWhiteIcon from "./components/icons/BrandWhiteIcon"; // icône de marque (blanche)
-import BrandIcon from "./components/icons/BrandIcon"; // icône alternative (non utilisée ici)
-import { Eye, EyeOff } from "lucide-react"; // icônes pour afficher/masquer le mot de passe
+import Cookies from "js-cookie";
+import BrandWhiteIcon from "./components/icons/BrandWhiteIcon";
+import BrandIcon from "./components/icons/BrandIcon";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
-    // état pour afficher ou masquer le mot de passe
-    const [showPassword, setShowPassword] = useState(false);
-
-    // état pour stocker l'email entré
-    const [email, setEmail] = useState("");
-
-    // état pour stocker le mot de passe entré
-    const [password, setPassword] = useState("");
-
-    // état pour savoir si l'utilisateur veut rester connecté
-    const [rememberMe, setRememberMe] = useState(false);
-
+    // États pour les champs de formulaire et options
+    const [showPassword, setShowPassword] = useState(false); // Afficher ou cacher le mot de passe
+    const [email, setEmail] = useState("");                  // Email de l'utilisateur
+    const [name, setName] = useState("");                    // Nom d'utilisateur
+    const [password, setPassword] = useState("");            // Mot de passe
+    const [rememberMe, setRememberMe] = useState(false);     // Option "Se souvenir de moi"
     // pour la navigation
     const navigate = useNavigate();
 
 
     return (
-        // Conteneur principal qui divise l'écran en deux parties
         <div className="w-full h-screen flex justify-center bg-white">
-
-            {/* SECTION GAUCHE : Image et message de bienvenue */}
+            {/* --- SECTION GAUCHE : Image illustrative --- */}
             <div className="w-1/2 h-screen bg-[#FFA325] flex items-center justify-center">
                 <div className="flex flex-col items-center justify-center space-y-6 gap-4">
-                    {/* Image de fond d'authentification */}
                     <img src={backgroundImage} alt="..." className="w-2/3 h-3/4" />
-
-                    {/* Slogan */}
                     <p className="text-white text-3xl font-extrabold text-center">
                         Votre voyage, pensé pour vous.
                     </p>
                 </div>
             </div>
 
-            {/* SECTION DROITE : Formulaire de connexion */}
+            {/* --- SECTION DROITE : Formulaire d'inscription --- */}
             <div className="w-1/2 h-screen flex flex-col justify-center items-center gap-4 bg-white">
-                {/* Logo ou icône de marque */}
+
+                {/* Logo de la marque */}
                 <div className="inline-flex">
                     <BrandWhiteIcon />
                 </div>
@@ -51,18 +41,34 @@ export default function Login() {
                 {/* Titre et sous-titre */}
                 <div className="w-full self-stretch inline-flex flex-col justify-start items-center gap-2">
                     <h1 className="justify-center text-gray-800 text-3xl font-bold font-['Urbanist'] leading-10">
-                        Connexion
+                        Inscription
                     </h1>
                     <p className="opacity-60 text-center justify-start text-gray-800 text-base font-normal font-['Urbanist'] leading-loose">
-                        Veuillez vous connecter pour continuer avec votre compte
+                        Veuillez renseigner vos informations pour créer votre compte
                     </p>
                 </div>
 
-                {/* FORMULAIRE */}
+                {/* --- CHAMPS DU FORMULAIRE --- */}
                 <div>
-                    {/* Champ email */}
+                    {/* Champ : Nom d'utilisateur */}
                     <div className="flex flex-col items-start relative my-4 w-md">
-                        <label className="block justify-start text-gray-800 text-sm font-semibold font-['Urbanist'] leading-snug" htmlFor="email">
+                        <label className="block text-gray-800 text-sm font-semibold font-['Urbanist']" htmlFor="name">
+                            Nom d’utilisateur
+                        </label>
+                        <input
+                            className="block w-full self-stretch text-gray-800 opacity-100 px-4 py-2.5 bg-orange-100 rounded-[16px] justify-start items-center gap-2.5 border border-gray-100 focus:outline-none focus:border-[#FF6300] transition duration-200 selection:bg-[#FF6300] selection:text-white"
+                            type="text"
+                            id="name"
+                            autoComplete="name"
+                            placeholder="John Doe"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Champ : Email */}
+                    <div className="flex flex-col items-start relative my-4 w-md">
+                        <label className="block text-gray-800 text-sm font-semibold font-['Urbanist']" htmlFor="email">
                             Email
                         </label>
                         <input
@@ -76,9 +82,9 @@ export default function Login() {
                         />
                     </div>
 
-                    {/* Champ mot de passe avec bouton d'affichage */}
+                    {/* Champ : Mot de passe */}
                     <div className="flex flex-col items-start relative my-4 w-md">
-                        <label className="block justify-start text-gray-800 text-sm font-semibold font-['Urbanist'] leading-snug" htmlFor="password">
+                        <label className="block text-gray-800 text-sm font-semibold font-['Urbanist']" htmlFor="password">
                             Mot de passe
                         </label>
                         <div className="relative w-full">
@@ -90,7 +96,7 @@ export default function Login() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
-                            {/* Icône d'œil pour afficher/masquer le mot de passe */}
+                            {/* Icône d'affichage du mot de passe */}
                             <button
                                 type="button"
                                 className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-gray-900"
@@ -101,56 +107,54 @@ export default function Login() {
                         </div>
                     </div>
 
-                    {/* Case à cocher "Rester connecté" */}
+                    {/* Champ : Confirmation du mot de passe */}
                     <div className="flex flex-col items-start relative my-4 w-md">
-                        <div className="inline-flex justify-start items-center gap-2.5">
+                        <label className="block text-gray-800 text-sm font-semibold font-['Urbanist']">
+                            Saisir à nouveau votre mot de passe
+                        </label>
+                        <div className="relative w-full">
                             <input
-                                type="checkbox"
-                                id="rememberMe"
-                                checked={rememberMe}
-                                onChange={(e) => setRememberMe(e.target.checked)}
+                                type={showPassword ? "text" : "password"}
+                                placeholder="****************"
+                                className="block w-full self-stretch text-gray-800 opacity-100 px-4 py-2.5 bg-orange-100 rounded-[16px] justify-start items-center gap-2.5 border border-gray-100 focus:outline-none focus:border-[#FF6300] transition duration-200 selection:bg-[#FF6300] selection:text-white"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                             />
-                            <label htmlFor="rememberMe" className="opacity-90 text-center justify-start text-gray-800 text-base font-normal font-['Urbanist'] leading-snug">
-                                Rester connecté
-                            </label>
+                            {/* Icône pour afficher/masquer le mot de passe */}
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-gray-900"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
                         </div>
                     </div>
 
-                    {/* Bouton de connexion */}
+                    {/* Bouton : S'inscrire */}
                     <div className="relative my-4 w-md">
-                        <button className="btn w-full relative overflow-hidden h-10 p-3 bg-orange-500 rounded-[400px] inline-flex justify-center items-center gap-2.5 text-white cursor-pointer hover:bg-orange-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                            Connexion
+                        <button className="w-full h-10 p-3 bg-orange-500 rounded-[400px] inline-flex justify-center items-center text-white hover:bg-orange-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                            S'inscrire
                         </button>
                     </div>
                 </div>
 
-                {/* Lien mot de passe oublié */}
-                <div>
-                    <button
-                        onClick={() => navigate("/forgot")}
-                        className="btn w-full relative overflow-hidden h-4 inline-flex justify-center items-center gap-2.5 cursor-pointer text-gray-800 text-sm font-semibold font-['Urbanist'] leading-snug underline"
-                    >
-                        Mot de passe oublié ?
-                    </button>
-                </div>
-
-                {/* Ligne de séparation avec "ou" */}
+                {/* --- AUTRES OPTIONS --- */}
                 <div className="relative w-md">
+                    {/* Séparateur "ou" */}
                     <div className="flex items-center justify-center my-4">
                         <div className="flex-1 border-t border-gray-300"></div>
                         <span className="px-4 text-gray-500">ou</span>
                         <div className="flex-1 border-t border-gray-300"></div>
                     </div>
 
-                    {/* Bouton Google Authentification */}
+                    {/* Bouton : Inscription avec Google */}
                     <button
                         onClick
-                        className="btn w-full relative overflow-hidden h-10 p-3 bg-white rounded-[400px] border border-gray-300 inline-flex justify-center items-center gap-2.5 text-gray-800 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                        className="w-full h-10 p-3 bg-white rounded-[400px] border border-gray-300 inline-flex justify-center items-center gap-2.5 text-gray-800 hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
                     >
                         {/* Icône Google */}
                         <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            {/* chemin SVG de l'icône Google */}
-                            {/* ... contenu de l'icône ... */}
                             <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <g clip-path="url(#clip0_141_213)">
                                     <path d="M4.43242 12.5863L3.73625 15.1852L1.19176 15.239C0.431328 13.8286 0 12.2148 0 10.5C0 8.84176 0.403281 7.27801 1.11812 5.90109H1.11867L3.38398 6.31641L4.37633 8.56813C4.16863 9.17363 4.05543 9.82363 4.05543 10.5C4.05551 11.2341 4.18848 11.9374 4.43242 12.5863Z" fill="#FBBB00" />
@@ -169,12 +173,12 @@ export default function Login() {
                         Google authentification
                     </button>
 
-                    {/* Lien pour créer un nouveau compte */}
+                    {/* Lien : Se connecter */}
                     <button
-                        onClick={() => navigate("/signup")}
+                        onClick={() => navigate("/login")}
                         className="btn w-full relative overflow-hidden h-4 mt-6 inline-flex justify-center items-center gap-2.5 cursor-pointer text-gray-800 text-sm font-semibold font-['Urbanist'] leading-snug underline"
                     >
-                        Créer un nouveau compte
+                        Se connecter
                     </button>
                 </div>
             </div>

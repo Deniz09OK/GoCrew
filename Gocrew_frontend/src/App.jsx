@@ -4,6 +4,8 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Login.jsx";
+import Signup from "./Signup.jsx";
+import Forgot from "./Forgot.jsx";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -13,7 +15,13 @@ function App() {
 
     <BrowserRouter>
       <Routes>
+        {/* Redirection par défaut vers /login */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
+        {/* Pages publiques */}
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot" element={<Forgot />} />
 
       </Routes>
     </BrowserRouter>
