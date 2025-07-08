@@ -10,10 +10,10 @@ stages:
 
 
 before_script:
-  # Reconstruit le .env à partir des variables GitLab CI/CD
   - echo "DATABASE_URL=$DATABASE_URL" >> .env
   - echo "JWT_SECRET=$JWT_SECRET" >> .env
-  - echo "PORT=$PORT" >> .env
+  - if [ -n "$PORT_BACKEND" ]; then echo "PORT=$PORT_BACKEND" >> .env; else echo "PORT=$PORT" >> .env; fi
+  - if [ -n "$PORT_FRONTEND" ]; then echo "PORT_FRONTEND=$PORT_FRONTEND" >> .env; fi
   - echo ".env reconstruit :"
   - cat .env
 
