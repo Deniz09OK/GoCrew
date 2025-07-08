@@ -16,14 +16,14 @@ const pool = new Pool({ connectionString });
 // Route de connexion utilisateur (login)
 router.post('/login', async (req, res) => {
     console.log('POST /login body:', req.body);
-    const { username, password } = req.body;
-    // Vérifie que les champs sont présents
-    if (!username || !password)
-        return res.status(400).json({ error: 'Nom d\'utilisateur et mot de passe requis.' });
+    // Utilise email pour la connexion (modifie aussi ton front si besoin)
+    const { email, password } = req.body;
+    if (!email || !password)
+        return res.status(400).json({ error: 'Email et mot de passe requis.' });
 
     try {
-        // Recherche l'utilisateur par username
-        const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        // Recherche l'utilisateur par email
+        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
         if (result.rows.length === 0)
             return res.status(401).json({ error: 'Utilisateur non trouvé.' });
 
@@ -33,8 +33,13 @@ router.post('/login', async (req, res) => {
         if (!valid)
             return res.status(401).json({ error: 'Mot de passe incorrect.' });
 
-        // Génère un token JWT pour la session
-        const token = jwt.sign({ id: user.id, email: user.email, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        // Génère un token JWT valable 2 minute
+        const token = jwt.sign(
+            { id: user.id, email: user.email, username: user.username },
+            process.env.JWT_SECRET,
+            
+            { expiresIn: '2m' }
+        );
         res.json({ token, user: { id: user.id, email: user.email, username: user.username } });
     } catch (err) {
         // Gestion des erreurs serveur

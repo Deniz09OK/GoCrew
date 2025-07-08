@@ -15,7 +15,7 @@
     <div id="error"></div>
     <!-- Formulaire de connexion -->
     <form id="loginForm">
-        <input type="text" id="username" placeholder="Nom d'utilisateur" required><br>
+        <input type="email" id="email" placeholder="Email" required><br>
         <input type="password" id="password" placeholder="Mot de passe" required><br>
         <button type="submit">Se connecter</button>
     </form>
@@ -25,14 +25,14 @@
         // Gestion de la soumission du formulaire de connexion
         document.getElementById('loginForm').onsubmit = async function(e) {
             e.preventDefault();
-            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             try {
                 // Envoie une requête POST à l'API de login
                 const res = await fetch('http://localhost:3000/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ email, password })
                 });
                 const data = await res.json();
                 if (res.ok) {
