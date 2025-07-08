@@ -1,10 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
 
+
 #root {
-  max-width: 1280px;
+  background-color: white;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0;
   text-align: center;
+  font-family: "Urbanist", sans-serif;
+}
+
+/* Couleur de fond quand l'autofill est actif */
+input:-webkit-autofill {
+  box-shadow: 0 0 0px 1000px var(--color-orange-100) inset; /* ta couleur secondaire claire */
+  -webkit-text-fill-color: #000; /* couleur du texte */
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .logo {
