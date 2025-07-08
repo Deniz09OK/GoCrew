@@ -22,5 +22,5 @@ app.use(express.static(__dirname));
 // Gestion des sockets temps réel (chat, notifications, etc.)
 require('./Gocrew_backend/src/socket/handler')(io);
 
-const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => console.log(`Serveur lancé sur le port ${PORT}`));
+const PORT_BACKEND = process.env.PORT_BACKEND || 3000;
+http.listen(PORT_BACKEND, () => console.log(`Serveur lancé sur le port pour le backend ${PORT_BACKEND}`));

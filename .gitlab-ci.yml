@@ -13,7 +13,7 @@ stages:
 before_script:
   - echo "DATABASE_URL=$DATABASE_URL" >> .env
   - echo "JWT_SECRET=$JWT_SECRET" >> .env
-  - if [ -n "$PORT_BACKEND" ]; then echo "PORT=$PORT_BACKEND" >> .env; fi
+  - if [ -n "$PORT_BACKEND" ]; then echo "PORT_BACKEND=$PORT_BACKEND" >> .env; fi
   - if [ -n "$PORT_FRONTEND" ]; then echo "PORT_FRONTEND=$PORT_FRONTEND" >> .env; fi
   - echo ".env reconstruit :"
   - cat .env
