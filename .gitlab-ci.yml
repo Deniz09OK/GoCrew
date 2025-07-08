@@ -7,12 +7,13 @@ stages:
   - build_frontend
   - docker_backend
   - docker_frontend
+  - docker-compose-up
 
 
 before_script:
   - echo "DATABASE_URL=$DATABASE_URL" >> .env
   - echo "JWT_SECRET=$JWT_SECRET" >> .env
-  - if [ -n "$PORT_BACKEND" ]; then echo "PORT=$PORT_BACKEND" >> .env; else echo "PORT=$PORT" >> .env; fi
+  - if [ -n "$PORT_BACKEND" ]; then echo "PORT=$PORT_BACKEND" >> .env; fi
   - if [ -n "$PORT_FRONTEND" ]; then echo "PORT_FRONTEND=$PORT_FRONTEND" >> .env; fi
   - echo ".env reconstruit :"
   - cat .env
@@ -38,7 +39,7 @@ build_backend:
   stage: build_backend
   script:
     - cd Gocrew_backend/src
-    - npm run build || echo "Aucune étape de construction pour le backend"
+    - npm run build
 
 build_frontend:
   stage: build_frontend
@@ -67,3 +68,17 @@ docker-build-frontend:
     - docker info
     - docker build -f Gocrew_frontend/Dockerfile -t $CI_REGISTRY_IMAGE-frontend:latest ./Gocrew_frontend
     - echo "Image Docker frontend buildée"
+
+docker-compose-up:
+  stage: docker-compose-up
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker compose up -d
+    - sleep 10
+    - docker compose ps
+    - docker compose down
+  needs:
+    - docker-build-backend
+    - docker-build-frontend
