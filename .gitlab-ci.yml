@@ -28,6 +28,11 @@ install_frontend:
   script:
     - cd Gocrew_frontend
     - npm install
+  artifacts:
+    paths:
+      - Gocrew_frontend/node_modules
+      - Gocrew_frontend/package-lock.json
+      - Gocrew_frontend/package.json
 
 build_backend:
   stage: build_backend
@@ -37,6 +42,8 @@ build_backend:
 
 build_frontend:
   stage: build_frontend
+  dependencies:
+    - install_frontend
   script:
     - cd Gocrew_frontend
     - npm run build
