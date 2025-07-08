@@ -33,14 +33,13 @@ router.post('/login', async (req, res) => {
         if (!valid)
             return res.status(401).json({ error: 'Mot de passe incorrect.' });
 
-        // Génère un token JWT valable 2 minute
+        // Génère un token JWT valable 2 minute, inclut le rôle
         const token = jwt.sign(
-            { id: user.id, email: user.email, username: user.username },
+            { id: user.id, email: user.email, username: user.username, role: user.role },
             process.env.JWT_SECRET,
-            
             { expiresIn: '2m' }
         );
-        res.json({ token, user: { id: user.id, email: user.email, username: user.username } });
+        res.json({ token, user: { id: user.id, email: user.email, username: user.username, role: user.role } });
     } catch (err) {
         // Gestion des erreurs serveur
         console.error('Erreur serveur:', err);
@@ -59,10 +58,10 @@ router.post('/register', async (req, res) => {
     try {
         // Hash le mot de passe avant insertion
         const hash = await bcrypt.hash(password, 10);
-        // Insère le nouvel utilisateur dans la base
+        // Insère le nouvel utilisateur dans la base avec le rôle 'member' par défaut
         const result = await pool.query(
-            'INSERT INTO users (email, password_hash, username, avatar_url) VALUES ($1, $2, $3, $4) RETURNING id, email, username, role, avatar_url',
-            [email, hash, username || null, avatar_url || null]
+            'INSERT INTO users (email, password_hash, username, avatar_url, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, username, role, avatar_url',
+            [email, hash, username || null, avatar_url || null, 'member']
         );
         console.log('Résultat insertion:', result.rows); 
         res.status(201).json({ user: result.rows[0] });
@@ -96,3 +95,6 @@ router.get('/me', authenticateToken, (req, res) => {
 });
 
 module.exports = router;
+
+// NOTE: Pour créer le compte admin (owner), insère manuellement dans la base :
+// INSERT INTO users (email, password_hash, username, role) VALUES ('admin@email.com', '<hash>', 'admin', 'owner');
