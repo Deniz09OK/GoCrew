@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useState } from "react";
 import backgroundImage from "./assets/background_auth.png";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -22,7 +22,30 @@ export default function Login() {
 
     // pour la navigation
     const navigate = useNavigate();
+    const [error, setError] = useState(""); // Ajout état pour afficher l'erreur
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+        try {
+            const res = await fetch("http://localhost:3000/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                // Stocke le token dans localStorage ou cookies
+                localStorage.setItem("token", data.token);
+                // Redirige vers la page d'accueil ou dashboard
+                navigate("/home");
+            } else {
+                setError(data.error || "Erreur de connexion");
+            }
+        } catch (err) {
+            setError("Erreur réseau : " + err.message);
+        }
+    };
 
     return (
         // Conteneur principal qui divise l'écran en deux parties
@@ -60,68 +83,75 @@ export default function Login() {
 
                 {/* FORMULAIRE */}
                 <div>
-                    {/* Champ email */}
-                    <div className="flex flex-col items-start relative my-4 w-md">
-                        <label className="block justify-start text-gray-800 text-sm font-semibold font-['Urbanist'] leading-snug" htmlFor="email">
-                            Email
-                        </label>
-                        <input
-                            className="block w-full self-stretch text-gray-800 opacity-100 px-4 py-2.5 bg-orange-100 rounded-[16px] justify-start items-center gap-2.5 border border-gray-100 focus:outline-none focus:border-[#FF6300] transition duration-200 selection:bg-[#FF6300] selection:text-white"
-                            type="email"
-                            id="email"
-                            autoComplete="email"
-                            placeholder="user@domaine.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                    </div>
-
-                    {/* Champ mot de passe avec bouton d'affichage */}
-                    <div className="flex flex-col items-start relative my-4 w-md">
-                        <label className="block justify-start text-gray-800 text-sm font-semibold font-['Urbanist'] leading-snug" htmlFor="password">
-                            Mot de passe
-                        </label>
-                        <div className="relative w-full">
+                    <form onSubmit={handleSubmit}>
+                        {/* Champ email */}
+                        <div className="flex flex-col items-start relative my-4 w-md">
+                            <label className="block justify-start text-gray-800 text-sm font-semibold font-['Urbanist'] leading-snug" htmlFor="email">
+                                Email
+                            </label>
                             <input
-                                id="password"
-                                type={showPassword ? "text" : "password"}
-                                placeholder="****************"
                                 className="block w-full self-stretch text-gray-800 opacity-100 px-4 py-2.5 bg-orange-100 rounded-[16px] justify-start items-center gap-2.5 border border-gray-100 focus:outline-none focus:border-[#FF6300] transition duration-200 selection:bg-[#FF6300] selection:text-white"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                type="email"
+                                id="email"
+                                autoComplete="email"
+                                placeholder="user@domaine.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                             />
-                            {/* Icône d'œil pour afficher/masquer le mot de passe */}
-                            <button
-                                type="button"
-                                className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-gray-900"
-                                onClick={() => setShowPassword(!showPassword)}
-                            >
-                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </div>
+
+                        {/* Champ mot de passe avec bouton d'affichage */}
+                        <div className="flex flex-col items-start relative my-4 w-md">
+                            <label className="block justify-start text-gray-800 text-sm font-semibold font-['Urbanist'] leading-snug" htmlFor="password">
+                                Mot de passe
+                            </label>
+                            <div className="relative w-full">
+                                <input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="****************"
+                                    className="block w-full self-stretch text-gray-800 opacity-100 px-4 py-2.5 bg-orange-100 rounded-[16px] justify-start items-center gap-2.5 border border-gray-100 focus:outline-none focus:border-[#FF6300] transition duration-200 selection:bg-[#FF6300] selection:text-white"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                                {/* Icône d'œil pour afficher/masquer le mot de passe */}
+                                <button
+                                    type="button"
+                                    className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-gray-900"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Case à cocher "Rester connecté" */}
+                        <div className="flex flex-col items-start relative my-4 w-md">
+                            <div className="inline-flex justify-start items-center gap-2.5">
+                                <input
+                                    type="checkbox"
+                                    id="rememberMe"
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                />
+                                <label htmlFor="rememberMe" className="opacity-90 text-center justify-start text-gray-800 text-base font-normal font-['Urbanist'] leading-snug">
+                                    Rester connecté
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Bouton de connexion */}
+                        <div className="relative my-4 w-md">
+                            <button type="submit" className="btn w-full relative overflow-hidden h-10 p-3 bg-orange-500 rounded-[400px] inline-flex justify-center items-center gap-2.5 text-white cursor-pointer hover:bg-orange-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                                Connexion
                             </button>
                         </div>
-                    </div>
 
-                    {/* Case à cocher "Rester connecté" */}
-                    <div className="flex flex-col items-start relative my-4 w-md">
-                        <div className="inline-flex justify-start items-center gap-2.5">
-                            <input
-                                type="checkbox"
-                                id="rememberMe"
-                                checked={rememberMe}
-                                onChange={(e) => setRememberMe(e.target.checked)}
-                            />
-                            <label htmlFor="rememberMe" className="opacity-90 text-center justify-start text-gray-800 text-base font-normal font-['Urbanist'] leading-snug">
-                                Rester connecté
-                            </label>
-                        </div>
-                    </div>
-
-                    {/* Bouton de connexion */}
-                    <div className="relative my-4 w-md">
-                        <button className="btn w-full relative overflow-hidden h-10 p-3 bg-orange-500 rounded-[400px] inline-flex justify-center items-center gap-2.5 text-white cursor-pointer hover:bg-orange-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                            Connexion
-                        </button>
-                    </div>
+                        {/* Message d'erreur */}
+                        {error && (
+                            <div className="text-red-500 text-sm mb-2">{error}</div>
+                        )}
+                    </form>
                 </div>
 
                 {/* Lien mot de passe oublié */}

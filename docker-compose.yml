@@ -11,11 +11,11 @@ services:
     volumes:
       - gocrew_data:/var/lib/postgresql/data
 
-  web:
+  backend:
     build:
       context: .
-      dockerfile: src/Dockerfile
-    container_name: gocrew-web
+      dockerfile: Gocrew_backend/src/Dockerfile
+    container_name: Gocrew_backend
     ports:
       - "3000:3000"
     env_file:
@@ -25,6 +25,21 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+
+  frontend:
+    build:
+      context: ./Gocrew_frontend
+      dockerfile: Dockerfile
+    container_name: Gocrew_frontend
+    ports:
+      - "5173:5173"
+    working_dir: /app
+    volumes:
+      - ./Gocrew_frontend:/app
+      - /app/node_modules
+    command: ["npm", "run", "dev"]
+    environment:
+      - CHOKIDAR_USEPOLLING=true
 
 volumes:
   gocrew_data:
