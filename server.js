@@ -1,26 +1,40 @@
 const express = require('express');
+const http = require('http');
+const cors = require('cors');
+const path = require('path');
+const dotenv = require('dotenv');
+const socketHandler = require('./Gocrew_backend/socket/handler');
+
+// Configuration
+dotenv.config();
 const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
-const authRoutes = require('./Gocrew_backend/src/routes/auth.routes');
-const cors = require('cors'); 
-require('dotenv').config(); // Charge les variables d'environnement depuis .env
+const server = http.createServer(app);
+const io = require('socket.io')(server, {
+    cors: {
+        origin: 'http://localhost:5173',
+        methods: ['GET', 'POST'],
+        credentials: true
+    }
+});
 
-const bcrypt = require('bcrypt');
-
+// Middlewares
 app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true
 }));
+app.use(express.json());
 
-app.use(express.json()); // Middleware pour parser le JSON des requêtes
-app.use('/api/auth', authRoutes); // Routes d'authentification
+// Routes
+app.use('/api', require('./Gocrew_backend/routes'));
 
-// Sert les fichiers statiques (HTML, JS, CSS) pour compatibilité front
-app.use(express.static(__dirname));
+// Fichiers statiques (pour le front si nécessaire)
+app.use(express.static(path.join(__dirname, 'public'))); // tu peux adapter vers 'frontend/dist' si tu build ton front
 
-// Gestion des sockets temps réel (chat, notifications, etc.)
-require('./Gocrew_backend/src/socket/handler')(io);
+// Sockets temps réel (chat, notifications...)
+socketHandler(io);
 
+// Lancement du serveur
 const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => console.log(`Serveur lancé sur le port ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`✅ Serveur lancé sur http://localhost:${PORT}`);
+});
