@@ -14,7 +14,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Gocrew_backend/src/Dockerfile
+      dockerfile: Gocrew_backend/Dockerfile
     container_name: Gocrew_backend
     ports:
       - "3000:3000"

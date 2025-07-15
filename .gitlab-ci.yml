@@ -21,7 +21,7 @@ before_script:
 install_backend:
   stage: install_backend
   script:
-    - cd Gocrew_backend/src
+    - cd Gocrew_backend/
     - npm install
 
 install_frontend:
@@ -38,7 +38,7 @@ install_frontend:
 build_backend:
   stage: build_backend
   script:
-    - cd Gocrew_backend/src
+    - cd Gocrew_backend/
     - npm run build
 
 build_frontend:
@@ -56,7 +56,7 @@ docker-build-backend:
     - docker:dind
   script:
     - docker info
-    - docker build -f Gocrew_backend/src/Dockerfile -t $CI_REGISTRY_IMAGE-backend:latest .
+    - docker build -f Gocrew_backend/Dockerfile -t $CI_REGISTRY_IMAGE-backend:latest .
     - echo "Image Docker backend buildée"
 
 docker-build-frontend:
