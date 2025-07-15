@@ -10,11 +10,15 @@ services:
       - "5432:5432"
     volumes:
       - gocrew_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=annecha
+      - POSTGRES_DB=gocrew
 
   backend:
     build:
       context: .
-      dockerfile: Gocrew_backend/src/Dockerfile
+      dockerfile: Gocrew_backend/Dockerfile
     container_name: Gocrew_backend
     ports:
       - "3000:3000"
