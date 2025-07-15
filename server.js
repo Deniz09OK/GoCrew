@@ -1,16 +1,26 @@
-const express = require("express");
+const express = require('express');
 const app = express();
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+const authRoutes = require('./Gocrew_backend/routes/auth.routes');
+const cors = require('cors'); 
+require('dotenv').config(); // Charge les variables d'environnement depuis .env
 
-const port = process.env.PORT || 5000;
+const bcrypt = require('bcrypt');
 
-app.get("/", (req, res) => {
-  return res.status(200).send({
-    message: "Hello World!",
-  });
-});
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 
-app.listen(port, () => {
-  console.log("Listening on " + port);
-});
+app.use(express.json()); // Middleware pour parser le JSON des requêtes
+app.use('/api/auth', authRoutes); // Routes d'authentification
 
-module.exports = app;
+// Sert les fichiers statiques (HTML, JS, CSS) pour compatibilité front
+app.use(express.static(__dirname));
+
+// Gestion des sockets temps réel (chat, notifications, etc.)
+require('./Gocrew_backend/socket/handler')(io);
+
+const PORT_BACKEND = process.env.PORT_BACKEND || 3000;
+http.listen(PORT_BACKEND, () => console.log(`Serveur lancé sur le port pour le backend ${PORT_BACKEND}`));

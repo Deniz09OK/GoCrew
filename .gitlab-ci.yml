@@ -1,0 +1,84 @@
+image: node:20
+
+stages:
+  - install_backend
+  - install_frontend
+  - build_backend
+  - build_frontend
+  - docker_backend
+  - docker_frontend
+  - docker-compose-up
+
+
+before_script:
+  - echo "DATABASE_URL=$DATABASE_URL" >> .env
+  - echo "JWT_SECRET=$JWT_SECRET" >> .env
+  - if [ -n "$PORT_BACKEND" ]; then echo "PORT_BACKEND=$PORT_BACKEND" >> .env; fi
+  - if [ -n "$PORT_FRONTEND" ]; then echo "PORT_FRONTEND=$PORT_FRONTEND" >> .env; fi
+  - echo ".env reconstruit :"
+  - cat .env
+
+install_backend:
+  stage: install_backend
+  script:
+    - cd Gocrew_backend/
+    - npm install
+
+install_frontend:
+  stage: install_frontend
+  script:
+    - cd Gocrew_frontend
+    - npm install
+  artifacts:
+    paths:
+      - Gocrew_frontend/node_modules
+      - Gocrew_frontend/package-lock.json
+      - Gocrew_frontend/package.json
+
+build_backend:
+  stage: build_backend
+  script:
+    - cd Gocrew_backend/
+    - npm run build
+
+build_frontend:
+  stage: build_frontend
+  dependencies:
+    - install_frontend
+  script:
+    - cd Gocrew_frontend
+    - npm run build
+
+docker-build-backend:
+  stage: docker_backend
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker info
+    - docker build -f Gocrew_backend/Dockerfile -t $CI_REGISTRY_IMAGE-backend:latest .
+    - echo "Image Docker backend buildée"
+
+docker-build-frontend:
+  stage: docker_frontend
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker info
+    - docker build -f Gocrew_frontend/Dockerfile -t $CI_REGISTRY_IMAGE-frontend:latest ./Gocrew_frontend
+    - echo "Image Docker frontend buildée"
+
+docker-compose-up:
+  stage: docker-compose-up
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker compose up -d
+    - sleep 10
+    - docker compose ps
+    - docker compose down
+  needs:
+    - docker-build-backend
+    - docker-build-frontend
