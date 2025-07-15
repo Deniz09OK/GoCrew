@@ -34,5 +34,5 @@ docker-build:
     - docker:dind
   script:
     - docker info
-    - docker build -f src/Dockerfile -t $CI_REGISTRY_IMAGE:latest .
+    - docker build -f /Dockerfile -t $CI_REGISTRY_IMAGE:latest .
     - echo "Image Docker buildée"
