@@ -9,5 +9,6 @@ router.use('/tasks', require('./TasksRoutes'));
 router.use('/messages', require('./MessagesRoutes'));
 router.use('/announcements', require('./AnnoucementsRoutes'));
 router.use('/documents', require('./DocumentsRoutes'));
+router.use('/create-crew', require('./CreateCrewRoutes'));
 
 module.exports = router;

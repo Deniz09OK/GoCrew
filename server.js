@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
-const authRoutes = require('./Gocrew_backend/routes/auth.routes');
 const cors = require('cors'); 
 require('dotenv').config(); // Charge les variables d'environnement depuis .env
 
@@ -14,10 +13,27 @@ app.use(cors({
 }));
 
 app.use(express.json()); // Middleware pour parser le JSON des requêtes
-app.use('/api/auth', authRoutes); // Routes d'authentification
+
+// Brancher toutes les routes API (y compris /auth, /create-crew, etc.)
+app.use('/api', require('./Gocrew_backend/routes/index'));
 
 // Sert les fichiers statiques (HTML, JS, CSS) pour compatibilité front
 app.use(express.static(__dirname));
+
+// Sert le Kanban pour /crew/:id
+app.get('/crew/:id', (req, res) => {
+    res.sendFile(__dirname + '/Gocrew_backend/crew-kanban.html');
+});
+
+// Sert welcome.html à la racine
+app.get('/welcome.html', (req, res) => {
+    res.sendFile(__dirname + '/Gocrew_backend/welcome.html');
+});
+
+// Sert la page d'annonce pour /announcement/:id
+app.get('/announcement/:id', (req, res) => {
+    res.sendFile(__dirname + '/Gocrew_backend/announcement.html');
+});
 
 // Gestion des sockets temps réel (chat, notifications, etc.)
 require('./Gocrew_backend/socket/handler')(io);

@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar.jsx";
 import Menu, {getBoardColor} from "./components/Menu.jsx";
-import { getBoards } from "./api/trelloApi.js";
 import PropTypes from "prop-types";
 import AppWelcome from "./components/AppWelcome.jsx";
-import BoardView from "./components/board/BoardView.jsx";
 
 export default function Home() {
     const [boards, setBoards] = useState([]);

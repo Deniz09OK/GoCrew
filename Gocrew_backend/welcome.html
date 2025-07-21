@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenue sur GoCrew</title>
+</head>
+<body>
+  <div class="container">
+    <h1>Bienvenue sur GoCrew !</h1>
+    <p>Organisez vos voyages en équipe facilement.</p>
+    <a href="/Gocrew_backend/CreateCrew.html" class="btn">Créer une Crew</a>
+    <a href="/Gocrew_backend/CreateAnnouncement.html" class="btn" style="margin-left:1rem;">Créer une Annonce</a>
+  </div>
+  <div class="crews-list" id="crewsList">
+    <h2>Vos Crews</h2>
+    <div id="crewsLinks">Chargement...</div>
+  </div>
+  <div class="announcements-list" id="announcementsList">
+    <h2>Annonces Publiques</h2>
+    <div id="announcementsLinks">Chargement...</div>
+  </div>
+  <script>
+    async function loadCrews() {
+      const res = await fetch('/api/crews');
+      const container = document.getElementById('crewsLinks');
+      if (!res.ok) {
+        container.textContent = "Erreur lors du chargement des crews.";
+        return;
+      }
+      const crews = await res.json();
+      if (!crews.length) {
+        container.textContent = "Aucune crew créée pour le moment.";
+        return;
+      }
+      const match = window.location.pathname.match(/\/crew\/(\d+)/);
+      const currentId = match ? match[1] : null;
+      container.innerHTML = crews.map(crew => `
+        <a href="/crew/${crew.id}" class="crew-link${currentId == crew.id ? ' active' : ''}">
+          ${crew.name} (${crew.destination || 'Destination inconnue'})
+        </a>
+      `).join('');
+    }
+
+    async function loadAnnouncements() {
+      const res = await fetch('/api/announcements');
+      const container = document.getElementById('announcementsLinks');
+      if (!res.ok) {
+        container.textContent = "Erreur lors du chargement des annonces.";
+        return;
+      }
+      const announcements = await res.json();
+      if (!announcements.length) {
+        container.textContent = "Aucune annonce publique pour le moment.";
+        return;
+      }
+      container.innerHTML = announcements.map(a => `
+        <a href="/announcement/${a.id}" class="announcement-link">
+          ${a.title} (${a.destination || 'Destination inconnue'})
+        </a>
+      `).join('');
+    }
+
+    loadCrews();
+    loadAnnouncements();
+  </script>
+</body>
+</html>

@@ -22,3 +22,41 @@ exports.createTask = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+exports.updateTask = async (req, res) => {
+    const { id } = req.params;
+    const { title, description, status } = req.body;
+    try {
+        // Récupère la tâche existante
+        const current = await pool.query('SELECT * FROM tasks WHERE id = $1', [id]);
+        if (current.rows.length === 0) return res.status(404).json({ error: 'Tâche non trouvée' });
+        const task = current.rows[0];
+
+        const newTitle = title !== undefined ? title : task.title;
+        const newDescription = description !== undefined ? description : task.description;
+        const newStatus = status !== undefined ? status : task.status;
+
+        const { rows } = await pool.query(
+            `UPDATE tasks SET
+                title = $1,
+                description = $2,
+                status = $3
+             WHERE id = $4 RETURNING *`,
+            [newTitle, newDescription, newStatus, id]
+        );
+        res.json(rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+exports.deleteTask = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const { rowCount } = await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
+        if (rowCount === 0) return res.status(404).json({ error: 'Tâche non trouvée' });
+        res.json({ message: 'Tâche supprimée' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
