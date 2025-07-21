@@ -30,6 +30,16 @@ app.get('/welcome.html', (req, res) => {
     res.sendFile(__dirname + '/Gocrew_backend/welcome.html');
 });
 
+// Sert la page de connexion
+app.get('/login.html', (req, res) => {
+    res.sendFile(__dirname + '/Gocrew_backend/login.html');
+});
+
+// Sert la page d'inscription
+app.get('/register.html', (req, res) => {
+    res.sendFile(__dirname + '/Gocrew_backend/register.html');
+});
+
 // Sert la page d'annonce pour /announcement/:id
 app.get('/announcement/:id', (req, res) => {
     res.sendFile(__dirname + '/Gocrew_backend/announcement.html');

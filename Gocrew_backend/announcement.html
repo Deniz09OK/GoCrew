@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Annonce publique - Kanban</title>
+  <title>Annonce publique - Kanban</title>cement-chat-form button:hover { background: #ff6300; }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -12,7 +13,18 @@
     <div class="meta" id="annMeta"></div>
     <div id="annDesc"></div>
     <div class="kanban-board" id="kanbanBoard"></div>
+
+    <!-- Chat de l'annonce (public, tout le monde peut parler) -->
+    <div id="announcement-chat">
+      <h2>💬 Chat de l'annonce</h2>
+      <div id="announcement-chat-messages"></div>
+      <form id="announcement-chat-form" autocomplete="off">
+        <input id="announcement-chat-input" type="text" placeholder="Votre message..." autocomplete="off">
+        <button type="submit">Envoyer</button>
+      </form>
+    </div>
   </div>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script>
     let crew_id = null;
     let lists = ['todo', 'doing', 'done'];
@@ -187,6 +199,51 @@
     }
 
     loadAnnouncement();
+
+    // --- Chat de l'annonce ---
+    const socket = io();
+    const annChatMessages = document.getElementById('announcement-chat-messages');
+    const annChatForm = document.getElementById('announcement-chat-form');
+    const annChatInput = document.getElementById('announcement-chat-input');
+    const gocrewUsername = localStorage.getItem('gocrew_username') || 'Anonyme';
+
+    // Récupère l'id de l'annonce
+    function getAnnouncementId() {
+      const match = window.location.pathname.match(/\/announcement\/(\d+)/);
+      return match ? match[1] : null;
+    }
+    const announcementId = getAnnouncementId();
+
+    // Rejoint le salon de l'annonce (public)
+    socket.on('connect', () => {
+      socket.emit('join-announcement-chat', { announcementId });
+    });
+
+    // Affiche un message dans le chat
+    function appendAnnMessage(msg) {
+      const div = document.createElement('div');
+      div.textContent = `[${msg.time || new Date().toLocaleTimeString()}] ${msg.user || 'Anonyme'}: ${msg.text}`;
+      annChatMessages.appendChild(div);
+      annChatMessages.scrollTop = annChatMessages.scrollHeight;
+    }
+
+    // Historique du chat
+    socket.on('chat-history-announcement', msgs => {
+      annChatMessages.innerHTML = '';
+      msgs.forEach(appendAnnMessage);
+    });
+
+    // Réception des messages
+    socket.on('chat-message-announcement', appendAnnMessage);
+
+    // Envoi d'un message
+    annChatForm.onsubmit = e => {
+      e.preventDefault();
+      const text = annChatInput.value.trim();
+      if (!text) return;
+      socket.emit('chat-message-announcement', { announcementId, text, user: gocrewUsername });
+      annChatInput.value = '';
+    };
   </script>
 </body>
 </html>

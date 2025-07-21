@@ -20,6 +20,17 @@
     <h2>Annonces Publiques</h2>
     <div id="announcementsLinks">Chargement...</div>
   </div>
+
+  <!-- Chat global -->
+  <div id="global-chat" style="max-width:500px;margin:2rem auto 0;background:#fff;border-radius:10px;box-shadow:0 2px 8px #0001;padding:1rem;">
+    <h2 style="color:#FFA325;margin-top:0;">💬 Chat global</h2>
+    <div id="chat-messages" style="height:200px;overflow-y:auto;background:#f7f7f7;padding:0.5rem;border-radius:8px;margin-bottom:1rem;"></div>
+    <form id="chat-form" style="display:flex;gap:0.5rem;">
+      <input id="chat-input" type="text" placeholder="Votre message..." style="flex:1;padding:0.5rem;border-radius:20px;border:1px solid #ccc;">
+      <button type="submit" style="padding:0.5rem 1.5rem;border-radius:20px;background:#FFA325;color:#fff;border:none;">Envoyer</button>
+    </form>
+  </div>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script>
     async function loadCrews() {
       const res = await fetch('/api/crews');
@@ -60,6 +71,40 @@
         </a>
       `).join('');
     }
+
+    // --- Chat global ---
+    const socket = io();
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    // Récupère le username depuis localStorage
+    const gocrewUsername = localStorage.getItem('gocrew_username') || 'Anonyme';
+
+    // Affiche un message dans le chat
+    function appendMessage(msg) {
+      const div = document.createElement('div');
+      div.textContent = `[${msg.time || new Date().toLocaleTimeString()}] ${msg.user || 'Anonyme'}: ${msg.text}`;
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Réception des messages
+    socket.on('chat-message', appendMessage);
+
+    // Historique (optionnel)
+    socket.on('chat-history', msgs => {
+      chatMessages.innerHTML = '';
+      msgs.forEach(appendMessage);
+    });
+
+    // Envoi d'un message
+    chatForm.onsubmit = e => {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+      socket.emit('chat-message', { text, user: gocrewUsername });
+      chatInput.value = '';
+    };
 
     loadCrews();
     loadAnnouncements();
