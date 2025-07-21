@@ -27,5 +27,9 @@
     "pg": "^8.16.3",
     "socket.io": "^4.8.1"
   },
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.54.1",
+    "playwright": "^1.54.1"
+  }
 }
