@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Annonce publique - Kanban</title>cement-chat-form button:hover { background: #ff6300; }
-  </style>
+  <title>Annonce publique - Kanban</title>
 </head>
 <body>
   <div class="container">
@@ -13,6 +12,9 @@
     <div class="meta" id="annMeta"></div>
     <div id="annDesc"></div>
     <div class="kanban-board" id="kanbanBoard"></div>
+
+    <!-- Liste des fichiers de l'annonce (affichée automatiquement) -->
+    <div id="announcementFilesList" style="margin-bottom:2rem;"></div>
 
     <!-- Chat de l'annonce (public, tout le monde peut parler) -->
     <div id="announcement-chat">
@@ -107,6 +109,9 @@
             <strong>${task.title}</strong><br>${task.description || ''}
             <button class="edit-task" title="Modifier">✏️</button>
             <button class="delete-task" title="Supprimer">🗑️</button>
+            <form class="upload-form" style="margin-top:5px;">
+              <input type="file" name="file" style="width:70%;">
+            </form>
           `;
           // Drag events
           div.addEventListener('dragstart', dragStart);
@@ -121,6 +126,30 @@
           div.querySelector('.edit-task').onclick = function(e) {
             e.stopPropagation();
             editTaskPrompt(task);
+          };
+          // Upload document/image lié à l'annonce
+          div.querySelector('.upload-form').onsubmit = async function(e) {
+            e.preventDefault();
+            const fileInput = this.file;
+            if (!fileInput.files.length) return;
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            // Ajoute l'id de l'annonce pour le backend
+            formData.append('announcementId', announcementId);
+            const res = await fetch('/api/documents/upload', {
+              method: 'POST',
+              body: formData
+            });
+            if (res.ok) {
+              alert('Fichier envoyé !');
+              await loadAnnouncementFiles(); // <-- Ajout : recharge la liste après upload
+            } else {
+              let err = 'Erreur upload';
+              try { err = (await res.json()).error || err; } catch {}
+              alert('Erreur: ' + err);
+            }
+            fileInput.value = '';
           };
           tasksDiv.appendChild(div);
         });
@@ -244,6 +273,29 @@
       socket.emit('chat-message-announcement', { announcementId, text, user: gocrewUsername });
       annChatInput.value = '';
     };
+
+    // Fonction pour charger et afficher les fichiers de l'annonce
+    async function loadAnnouncementFiles() {
+      const listDiv = document.getElementById('announcementFilesList');
+      listDiv.textContent = 'Chargement...';
+      const res = await fetch(`/api/documents/list-announcement/${announcementId}`);
+      if (!res.ok) {
+        listDiv.textContent = 'Erreur lors du chargement des fichiers.';
+        return;
+      }
+      const files = await res.json();
+      if (!files.length) {
+        listDiv.textContent = '';
+        return;
+      }
+      listDiv.innerHTML = files.map(f =>
+        `<a href="${f.url}" download="${f.filename}" target="_blank" style="display:block;margin-bottom:5px;">${f.filename}</a>`
+      ).join('');
+    }
+
+    // Appelle la fonction au chargement de la page
+    window.addEventListener('DOMContentLoaded', loadAnnouncementFiles);
   </script>
 </body>
 </html>
+

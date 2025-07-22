@@ -6,19 +6,18 @@
   <title>Créer une Annonce Publique</title>
 </head>
 <body>
-  <div class="container">
-    <h1>Créer une Annonce Publique</h1>
-    <form id="announcementForm">
-      <label>Titre
-        <input type="text" name="title" required>
-      </label>
-      <label>Description
-        <textarea name="description"></textarea>
-      </label>
-      <label>Destination
-        <input type="text" name="destination">
-      </label>
-      <label>Budget
+  <h1>Créer une Annonce Publique</h1>
+  <form id="announcementForm">
+    <label>Titre
+      <input type="text" name="title" required>
+    </label>
+    <label>Description
+      <textarea name="description"></textarea>
+    </label>
+    <label>Destination
+      <input type="text" name="destination">
+    </label>
+    <label>Budget
       <div class="budget-row">
         <input type="number" name="budget" min="0" step="1" pattern="\d*" inputmode="numeric" required>
         <select name="currency" required>
@@ -27,22 +26,21 @@
         </select>
       </div>
     </label>
-      <label>Début du voyage
-        <input type="date" name="start_date">
-      </label>
-      <label>Fin du voyage
-        <input type="date" name="end_date">
-      </label>
-      <label>Votre rôle sur cette annonce
-        <select name="role" required>
-          <option value="viewer">Viewer (lecture seule)</option>
-          <option value="member">Member (peut modifier)</option>
-        </select>
-      </label>
-      <button type="submit">Créer l'annonce</button>
-    </form>
-    <div id="result"></div>
-  </div>
+    <label>Début du voyage
+      <input type="date" name="start_date">
+    </label>
+    <label>Fin du voyage
+      <input type="date" name="end_date">
+    </label>
+    <label>Votre rôle sur cette annonce
+      <select name="role" required>
+        <option value="viewer">Viewer (lecture seule)</option>
+        <option value="member">Member (peut modifier)</option>
+      </select>
+    </label>
+    <button type="submit">Créer l'annonce</button>
+  </form>
+  <div id="result"></div>
   <script>
     document.getElementById('announcementForm').onsubmit = async function(e) {
       e.preventDefault();
@@ -74,5 +72,7 @@
       }
     };
   </script>
+</body>
+</html>
 </body>
 </html>

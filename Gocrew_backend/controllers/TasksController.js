@@ -25,27 +25,35 @@ exports.createTask = async (req, res) => {
 
 exports.updateTask = async (req, res) => {
     const { id } = req.params;
-    const { title, description, status } = req.body;
+    const { title, description, status, file_url } = req.body;
     try {
         // Récupère la tâche existante
         const current = await pool.query('SELECT * FROM tasks WHERE id = $1', [id]);
         if (current.rows.length === 0) return res.status(404).json({ error: 'Tâche non trouvée' });
         const task = current.rows[0];
 
+        // Correction : vérifie si la colonne file_url existe dans la table tasks
+        // Si elle n'existe pas, retire file_url de la requête SQL ci-dessous
+
+        // Si tu as bien une colonne file_url dans ta table tasks :
         const newTitle = title !== undefined ? title : task.title;
         const newDescription = description !== undefined ? description : task.description;
         const newStatus = status !== undefined ? status : task.status;
+        const newFileUrl = file_url !== undefined ? file_url : task.file_url;
 
         const { rows } = await pool.query(
             `UPDATE tasks SET
                 title = $1,
                 description = $2,
-                status = $3
-             WHERE id = $4 RETURNING *`,
-            [newTitle, newDescription, newStatus, id]
+                status = $3,
+                file_url = $4
+             WHERE id = $5 RETURNING *`,
+            [newTitle, newDescription, newStatus, newFileUrl, id]
         );
         res.json(rows[0]);
     } catch (err) {
+        // Ajoute un log pour voir l'erreur côté serveur
+        console.error('Erreur updateTask:', err);
         res.status(500).json({ error: err.message });
     }
 };

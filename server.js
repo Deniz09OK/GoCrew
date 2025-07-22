@@ -48,5 +48,8 @@ app.get('/announcement/:id', (req, res) => {
 // Gestion des sockets temps réel (chat, notifications, etc.)
 require('./Gocrew_backend/socket/handler')(io);
 
+// Sert les fichiers uploadés pour accès direct depuis le front
+app.use('/uploads', express.static(__dirname + '/Gocrew_backend/uploads'));
+
 const PORT_BACKEND = process.env.PORT_BACKEND || 3000;
 http.listen(PORT_BACKEND, () => console.log(`Serveur lancé sur le port pour le backend ${PORT_BACKEND}`));

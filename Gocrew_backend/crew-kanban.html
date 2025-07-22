@@ -9,6 +9,10 @@
   <h1>Kanban du Crew</h1>
   <div class="kanban-board" id="kanbanBoard"></div>
 
+  <!-- Bouton pour afficher les fichiers du crew -->
+  <button id="showCrewFilesBtn" style="margin:1rem 0;">Afficher les fichiers du crew</button>
+  <div id="crewFilesList" style="margin-bottom:2rem;"></div>
+
   <!-- Chat du crew -->
   <div id="crew-chat">
     <h2>💬 Chat du crew</h2>
@@ -50,6 +54,13 @@
       draggedTaskId = null;
     }
 
+    // Extensions autorisées pour l'upload
+    const allowedExtensions = [
+      '.pdf', '.gif', '.jpg', '.jpeg', '.jfif', '.pjpeg', '.pjp', '.png', '.svg',
+      '.docx', '.xlsx', '.pptx'
+    ];
+
+    // Remplace la fonction editTaskPrompt pour utiliser prompt() natif (comme sur la 2ème image)
     function editTaskPrompt(task) {
       const title = prompt('Titre de la tâche', task.title);
       if (title === null) return;
@@ -89,6 +100,9 @@
             <strong>${task.title}</strong><br>${task.description || ''}
             <button class="edit-task" title="Modifier">✏️</button>
             <button class="delete-task" title="Supprimer">🗑️</button>
+            <form class="upload-form" style="margin-top:5px;">
+              <input type="file" name="file" style="width:70%;">
+            </form>
           `;
           // Drag events
           div.addEventListener('dragstart', dragStart);
@@ -103,6 +117,28 @@
           div.querySelector('.edit-task').onclick = function(e) {
             e.stopPropagation();
             editTaskPrompt(task);
+          };
+          // Upload document/image lié au crew
+          div.querySelector('.upload-form').onsubmit = async function(e) {
+            e.preventDefault();
+            const fileInput = this.file;
+            if (!fileInput.files.length) return;
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            // Ajoute l'id du crew pour le backend (même logique que pour les annonces)
+            formData.append('crewId', crew_id);
+            const res = await fetch('/api/documents/upload', {
+              method: 'POST',
+              body: formData
+            });
+            if (res.ok) {
+              alert('Fichier envoyé !');
+            } else {
+              const err = await res.json();
+              alert('Erreur: ' + (err.error || 'upload'));
+            }
+            fileInput.value = '';
           };
           tasksDiv.appendChild(div);
         });
@@ -204,6 +240,25 @@
       if (!text) return;
       socket.emit('chat-message-crew', { crewId: crew_id, text, user: gocrewUsername });
       chatInput.value = '';
+    };
+
+    // Affichage des fichiers du crew
+    document.getElementById('showCrewFilesBtn').onclick = async function() {
+      const listDiv = document.getElementById('crewFilesList');
+      listDiv.textContent = 'Chargement...';
+      const res = await fetch(`/api/documents/list-crew/${crew_id}`);
+      if (!res.ok) {
+        listDiv.textContent = 'Erreur lors du chargement des fichiers.';
+        return;
+      }
+      const files = await res.json();
+      if (!files.length) {
+        listDiv.textContent = 'Aucun fichier pour ce crew.';
+        return;
+      }
+      listDiv.innerHTML = files.map(f =>
+        `<a href="${f.url}" target="_blank" style="display:block;margin-bottom:5px;">${f.filename}</a>`
+      ).join('');
     };
   </script>
 </body>
