@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
   "repository": {
@@ -26,7 +25,13 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "pg": "^8.16.3",
+    "react-icons": "^5.5.0",
     "socket.io": "^4.8.1"
   },
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.54.1",
+    "@types/node": "^24.0.15",
+    "playwright": "^1.54.1"
+  }
 }

@@ -8,6 +8,7 @@ stages:
   - docker_backend
   - docker_frontend
   - docker-compose-up
+  - test
 
 
 before_script:
@@ -82,3 +83,18 @@ docker-compose-up:
   needs:
     - docker-build-backend
     - docker-build-frontend
+
+e2e_tests:
+  stage: test
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - docker-compose up --build --abort-on-container-exit e2e-tests
+    - docker-compose down
+  only:
+    - merge_requests
+    - main

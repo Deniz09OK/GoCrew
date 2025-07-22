@@ -37,8 +37,8 @@ export default function Login() {
             if (res.ok) {
                 // Stocke le token dans localStorage ou cookies
                 localStorage.setItem("token", data.token);
-                // Redirige vers la page d'accueil ou dashboard
-                navigate("/home");
+                // Redirige vers la page privée
+                navigate("/homeprivate");
             } else {
                 setError(data.error || "Erreur de connexion");
             }

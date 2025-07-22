@@ -33,5 +33,15 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
 
+  e2e-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npx playwright test tests/e2e
+    depends_on:
+      - backend
+    environment:
+      - BASE_URL=http://backend:3000
+
 volumes:
   gocrew_data:
