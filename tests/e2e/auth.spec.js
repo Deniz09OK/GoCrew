@@ -1,4 +1,7 @@
-// Exemple de test Playwright pour l'inscription et la connexion
+// test Playwright pour l'inscription et la connexion
+
+
+
 const { test, expect } = require('@playwright/test');
 
 test.describe('Inscription et Connexion', () => {
