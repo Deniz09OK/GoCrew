@@ -37,6 +37,8 @@ export default function Login() {
             if (res.ok) {
                 // Stocke le token dans localStorage ou cookies
                 localStorage.setItem("token", data.token);
+                // Affiche l'id utilisateur (exemple)
+                alert(`Votre ID utilisateur : ${data.user?.id}`);
                 // Redirige vers la page privée
                 navigate("/homeprivate");
             } else {

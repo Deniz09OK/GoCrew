@@ -6,3 +6,4 @@ router.get('/', controller.getAllCrewMembers);
 router.post('/', controller.addCrewMember);
 
 module.exports = router;
+
