@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Inscription utilisateur</title>
+</head>
+<body>
+    <h1>Inscription</h1>
+    <form id="registerForm">
+        <label>Email : <input type="email" name="email" required></label><br>
+        <label>Mot de passe : <input type="password" name="password" required></label><br>
+        <label>Nom d'utilisateur : <input type="text" name="username"></label><br>
+        <label>Avatar URL (optionnel) : <input type="url" name="avatar_url"></label><br>
+        <button type="submit">S'inscrire</button>
+    </form>
+    <hr>
+    <div id="registerResult"></div>
+
+    <script>
+        const apiBase = "http://localhost:3000";
+
+        document.getElementById("registerForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const body = {
+                email: form.email.value,
+                password: form.password.value,
+                username: form.username.value,
+                avatar_url: form.avatar_url.value
+            };
+            document.getElementById("registerResult").textContent = "Inscription en cours...";
+            try {
+                const res = await fetch(`${apiBase}/api/auth/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById("registerResult").innerHTML = `
+                        <b>Inscription réussie !</b><br>
+                        <pre>${JSON.stringify(data.user, null, 2)}</pre>
+                    `;
+                } else {
+                    document.getElementById("registerResult").textContent = "Erreur : " + (data.error || res.statusText);
+                }
+            } catch (err) {
+                document.getElementById("registerResult").textContent = "Erreur réseau : " + err.message;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -22,6 +22,24 @@
         <button type="submit">Créer Crew</button>
     </form>
 
+    <!-- Formulaire pour inviter un membre par email -->
+    <h2>Inviter un membre dans un Crew (par email)</h2>
+    <form id="inviteMemberForm">
+        <label>ID du Crew : <input type="number" name="crewId" required></label><br>
+        <label>Email du membre : <input type="email" name="email" required></label><br>
+        <label>Rôle (optionnel) : <input type="text" name="role"></label><br>
+        <label>Label (optionnel) : <input type="text" name="label"></label><br>
+        <button type="submit">Inviter</button>
+    </form>
+
+    <!-- Formulaire pour supprimer un membre par email -->
+    <h2>Supprimer un membre d'un Crew par email</h2>
+    <form id="removeMemberForm">
+        <label>ID du Crew : <input type="number" name="crewId" required></label><br>
+        <label>Email du membre à supprimer : <input type="email" name="email" required></label><br>
+        <button type="submit">Supprimer</button>
+    </form>
+
     <hr>
     <h2>Résultat API</h2>
     <pre id="result"></pre>
@@ -59,6 +77,58 @@
 
         // Active le formulaire pour créer un crew
         sendForm("createCrewForm", "/api/crews");
+
+        // Fonction utilitaire pour récupérer l'user_id à partir de l'email
+        async function getUserIdByEmail(email) {
+            const res = await fetch(`${apiBase}/api/auth/user-by-email?email=${encodeURIComponent(email)}`);
+            if (!res.ok) throw new Error("Utilisateur non trouvé");
+            const data = await res.json();
+            return data.id;
+        }
+
+        // Inviter un membre par email
+        document.getElementById("inviteMemberForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const crew_id = form.crewId.value;
+            const email = form.email.value;
+            const role = form.role.value;
+            const label = form.label.value;
+
+            try {
+                const user_id = await getUserIdByEmail(email);
+                const body = { crew_id, user_id, role, label };
+                const res = await fetch(`${apiBase}/api/crew_members`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                document.getElementById("result").textContent = "Erreur: " + err.message;
+            }
+        });
+
+        // Supprimer un membre par email
+        document.getElementById("removeMemberForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const crew_id = form.crewId.value;
+            const email = form.email.value;
+            try {
+                const user_id = await getUserIdByEmail(email);
+                const res = await fetch(`${apiBase}/api/crew_members`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ crew_id, user_id })
+                });
+                const data = await res.json();
+                document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                document.getElementById("result").textContent = "Erreur: " + err.message;
+            }
+        });
     </script>
 </body>
 

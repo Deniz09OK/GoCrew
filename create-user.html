@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Créer un utilisateur</title>
+</head>
+<body>
+    <h1>Créer un utilisateur</h1>
+    <form id="userForm">
+        <label>Email : <input type="email" name="email" required></label><br>
+        <label>Mot de passe : <input type="password" name="password" required></label><br>
+        <label>Nom d'utilisateur : <input type="text" name="username" required></label><br>
+        <label>Rôle : 
+            <select name="role">
+                <option value="member">Membre</option>
+                <option value="admin">Admin</option>
+            </select>
+        </label><br>
+        <button type="submit">Créer</button>
+    </form>
+    <hr>
+    <div id="userResult"></div>
+
+    <script>
+        const apiBase = "http://localhost:3000";
+
+        document.getElementById("userForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const body = {
+                email: form.email.value,
+                password: form.password.value,
+                username: form.username.value,
+                role: form.role.value
+            };
+            document.getElementById("userResult").textContent = "Création en cours...";
+            try {
+                const res = await fetch(`${apiBase}/api/auth/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById("userResult").innerHTML = `
+                        <b>Utilisateur créé !</b><br>
+                        <pre>${JSON.stringify(data.user, null, 2)}</pre>
+                    `;
+                } else {
+                    document.getElementById("userResult").textContent = "Erreur : " + (data.error || res.statusText);
+                }
+            } catch (err) {
+                document.getElementById("userResult").textContent = "Erreur réseau : " + err.message;
+            }
+        });
+    </script>
+</body>
+</html>

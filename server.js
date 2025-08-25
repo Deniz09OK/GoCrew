@@ -19,16 +19,36 @@ app.use(express.json()); // Middleware pour parser le JSON des requêtes
 app.use('/api/auth', authRoutes);
 app.use('/api/crews', CrewRoutes);
 
-// Sert le formulaire HTML à la racine
+// Sert les fichiers statiques (HTML, JS, CSS, etc.)
+app.use(express.static(__dirname));
+
+// Sert le formulaire principal à la racine
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/test.html');
 });
 
-// Sert les fichiers statiques (optionnel, utile si tu as d'autres fichiers à servir)
-app.use(express.static(__dirname));
+// Sert la page de création d'utilisateur
+app.get('/user', (req, res) => {
+    res.sendFile(__dirname + '/user.html');
+});
+
+// Sert la page d'inscription (register)
+app.get('/register', (req, res) => {
+    res.sendFile(__dirname + '/register.html');
+});
+
+// Sert la page de profil utilisateur
+app.get('/profile', (req, res) => {
+    res.sendFile(__dirname + '/user-profile.html');
+});
 
 // Gestion des sockets temps réel (chat, notifications, etc.)
 require('./Gocrew_backend/socket/handler')(io);
+
+// Gestion d'erreur 404 pour les routes inconnues
+app.use((req, res) => {
+    res.status(404).json({ error: "Route non trouvée" });
+});
 
 const PORT_BACKEND = process.env.PORT_BACKEND || 3000;
 http.listen(PORT_BACKEND, () => console.log(`Serveur lancé sur le port pour le backend ${PORT_BACKEND}`));
