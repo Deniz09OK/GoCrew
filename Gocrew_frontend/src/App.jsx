@@ -5,10 +5,11 @@ import HomePublic from "./HomePublic.jsx";
 import Login from "./Login.jsx";
 import Signup from "./Signup.jsx";
 import Forgot from "./Forgot.jsx";
+import Profile from "./Profile.jsx";
+import Crew from "./Crew";
 
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
 
@@ -23,7 +24,10 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot" element={<Forgot />} />
-
+        
+        {/* Page de profil, protégée par authentification */}
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/crew" element={<Crew />} />
 
       </Routes>
     </BrowserRouter>

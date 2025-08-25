@@ -2,9 +2,7 @@ import {useState } from "react";
 import backgroundImage from "./assets/background_auth.png";
 import { Link, useNavigate } from "react-router-dom";
 
-import Cookies from "js-cookie"; // pour manipuler les cookies (non utilisé ici)
 import BrandWhiteIcon from "./components/icons/BrandWhiteIcon"; // icône de marque (blanche)
-import BrandIcon from "./components/icons/BrandIcon"; // icône alternative (non utilisée ici)
 import { Eye, EyeOff } from "lucide-react"; // icônes pour afficher/masquer le mot de passe
 
 export default function Login() {
@@ -34,12 +32,9 @@ export default function Login() {
                 body: JSON.stringify({ email, password })
             });
             const data = await res.json();
-            if (res.ok) {
-                // Stocke le token dans localStorage ou cookies
-                localStorage.setItem("token", data.token);
-                // Affiche l'id utilisateur (exemple)
+            if (res.ok && data.token) {
+                localStorage.setItem("token", data.token); // Stocke le token
                 alert(`Votre ID utilisateur : ${data.user?.id}`);
-                // Redirige vers la page privée
                 navigate("/homeprivate");
             } else {
                 setError(data.error || "Erreur de connexion");
@@ -48,6 +43,12 @@ export default function Login() {
             setError("Erreur réseau : " + err.message);
         }
     };
+
+    const token = localStorage.getItem("token");
+    console.log("Token envoyé :", token);
+    fetch("http://localhost:3000/api/auth/profile", {
+        headers: { Authorization: `Bearer ${token}` }
+    })
 
     return (
         // Conteneur principal qui divise l'écran en deux parties

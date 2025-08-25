@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kanban Crew</title>
+</head>
+<body>
+  <h1>Kanban du Crew</h1>
+  <div id="lists-bar">
+    <form id="addListForm" style="display:inline-flex;gap:0.5rem;">
+      <input type="text" id="newListName" placeholder="Nouvelle liste" required>
+      <button type="submit">Ajouter une liste</button>
+    </form>
+  </div>
+  <div class="kanban-board" id="kanbanBoard"></div>
+  <script>
+    function getCrewId() {
+      const match = window.location.pathname.match(/\/crew\/(\d+)/);
+      return match ? match[1] : null;
+    }
+    const crew_id = getCrewId();
+
+    // --- Gestion des listes dynamiques ---
+    let lists = ['todo', 'doing', 'done']; // Par défaut, mais sera mis à jour dynamiquement
+
+    // Récupère toutes les tâches et les listes
+    async function fetchTasks() {
+      const res = await fetch(`/api/tasks?crew_id=${crew_id}`);
+      if (!res.ok) return [];
+      return await res.json();
+    }
+
+    function getAllLists(tasks) {
+      const set = new Set(lists);
+      tasks.forEach(t => set.add(t.status));
+      return Array.from(set);
+    }
+
+    // Drag & Drop logic
+    let draggedTaskId = null;
+
+    function dragStart(e) {
+      draggedTaskId = this.dataset.id;
+      setTimeout(() => this.style.display = "none", 0);
+    }
+    function dragEnd(e) {
+      this.style.display = "";
+      draggedTaskId = null;
+    }
+
+    // Edition d'une tâche (card)
+    function editTaskPrompt(task) {
+      const title = prompt('Titre de la tâche', task.title);
+      if (title === null) return;
+      const description = prompt('Description', task.description || '');
+      if (description === null) return;
+      fetch(`/api/tasks/${task.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description })
+      }).then(() => loadKanban());
+    }
+
+    // Render dynamique du board
+    function renderKanban(tasks) {
+      lists = getAllLists(tasks);
+      const board = document.getElementById('kanbanBoard');
+      board.innerHTML = '';
+      lists.forEach(list => {
+        const col = document.createElement('div');
+        col.className = 'kanban-column';
+        col.id = list;
+
+        // Titre de la liste + boutons modifier/supprimer
+        const titleDiv = document.createElement('div');
+        titleDiv.style.position = 'relative';
+        titleDiv.innerHTML = `<h2>${list}</h2>
+          <button class="edit-list" title="Renommer la liste">✏️</button>
+          <button class="delete-list" title="Supprimer la liste">🗑️</button>`;
+        col.appendChild(titleDiv);
+
+        // Liste des tâches
+        const tasksDiv = document.createElement('div');
+        tasksDiv.className = 'tasks';
+        tasks.filter(t => t.status === list).forEach(task => {
+          const div = document.createElement('div');
+          div.className = 'task';
+          div.draggable = true;
+          div.dataset.id = task.id;
+          div.innerHTML = `
+            <strong>${task.title}</strong><br>${task.description || ''}
+            <button class="edit-task" title="Modifier">✏️</button>
+            <button class="delete-task" title="Supprimer">🗑️</button>
+          `;
+          // Drag events
+          div.addEventListener('dragstart', dragStart);
+          div.addEventListener('dragend', dragEnd);
+          // Delete task
+          div.querySelector('.delete-task').onclick = async function(e) {
+            e.stopPropagation();
+            await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
+            loadKanban();
+          };
+          // Edit task
+          div.querySelector('.edit-task').onclick = function(e) {
+            e.stopPropagation();
+            editTaskPrompt(task);
+          };
+          tasksDiv.appendChild(div);
+        });
+        col.appendChild(tasksDiv);
+
+        // Formulaire d'ajout de tâche
+        const form = document.createElement('form');
+        form.className = 'add-task-form';
+        form.dataset.status = list;
+        form.innerHTML = `
+          <input type="text" name="title" placeholder="Titre" required>
+          <textarea name="description" placeholder="Description"></textarea>
+          <button type="submit">Ajouter</button>
+        `;
+        form.onsubmit = async function(e) {
+          e.preventDefault();
+          const title = form.title.value;
+          const description = form.description.value;
+          await fetch('/api/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ crew_id, title, description, status: list })
+          });
+          form.reset();
+          loadKanban();
+        };
+        col.appendChild(form);
+
+        // Gestion suppression/édition de liste
+        titleDiv.querySelector('.delete-list').onclick = async function() {
+          if (confirm('Supprimer la liste et toutes ses tâches ?')) {
+            // Supprime toutes les tâches de cette liste
+            await Promise.all(tasks.filter(t => t.status === list).map(t =>
+              fetch(`/api/tasks/${t.id}`, { method: 'DELETE' })
+            ));
+            // Retire la liste du tableau
+            lists = lists.filter(l => l !== list);
+            loadKanban();
+          }
+        };
+        titleDiv.querySelector('.edit-list').onclick = function() {
+          const newName = prompt('Nouveau nom de la liste ?', list);
+          if (newName && newName !== list) {
+            // Met à jour le statut de toutes les tâches de cette liste
+            Promise.all(tasks.filter(t => t.status === list).map(t =>
+              fetch(`/api/tasks/${t.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newName })
+              })
+            )).then(() => {
+              lists = lists.map(l => l === list ? newName : l);
+              loadKanban();
+            });
+          }
+        };
+
+        board.appendChild(col);
+      });
+
+      // Drag & drop listeners sur les colonnes (toujours après render)
+      document.querySelectorAll('.kanban-column .tasks').forEach(col => {
+        col.ondragover = function(e) {
+          e.preventDefault();
+          this.classList.add('drag-over');
+        };
+        col.ondragleave = function(e) {
+          this.classList.remove('drag-over');
+        };
+        col.ondrop = async function(e) {
+          e.preventDefault();
+          this.classList.remove('drag-over');
+          if (!draggedTaskId) return;
+          const parentCol = this.closest('.kanban-column');
+          const newStatus = parentCol.id;
+          // Met à jour le statut côté backend
+          await fetch(`/api/tasks/${draggedTaskId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+          });
+          loadKanban();
+        };
+      });
+    }
+
+    // Ajout d'une nouvelle liste
+    document.getElementById('addListForm').onsubmit = function(e) {
+      e.preventDefault();
+      const newList = document.getElementById('newListName').value.trim();
+      if (newList && !lists.includes(newList)) {
+        lists.push(newList);
+        document.getElementById('newListName').value = '';
+        loadKanban();
+      }
+    };
+
+    async function loadKanban() {
+      const tasks = await fetchTasks();
+      renderKanban(tasks);
+    }
+
+    loadKanban();
+  </script>
+</body>
+</html>

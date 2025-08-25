@@ -3,6 +3,8 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const authRoutes = require('./Gocrew_backend/routes/auth.routes');
+const userRoutes = require('./Gocrew_backend/routes/UsersRoutes');
+const crewRoutes = require('./Gocrew_backend/routes/CrewRoutes');
 const cors = require('cors'); 
 require('dotenv').config(); // Charge les variables d'environnement depuis .env
 
@@ -15,9 +17,11 @@ app.use(cors({
 
 app.use(express.json()); // Middleware pour parser le JSON des requêtes
 app.use('/api/auth', authRoutes); // Routes d'authentification
+app.use('/api/users', userRoutes); // Routes utilisateurs
+app.use('/api/crews', crewRoutes); // Routes équipes
 
 // Sert les fichiers statiques (HTML, JS, CSS) pour compatibilité front
-app.use(express.static(__dirname));
+app.use(express.static(__dirname + '/Gocrew_frontend/dist'));
 
 // Gestion des sockets temps réel (chat, notifications, etc.)
 require('./Gocrew_backend/socket/handler')(io);
