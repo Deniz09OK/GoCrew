@@ -25,7 +25,7 @@ exports.createCrew = async (req, res) => {
     try {
         const { rows } = await pool.query(
             `INSERT INTO crews (name, description, destination, budget, start_date, end_date, owner_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
             [name, description, destination, budget, start_date, end_date, owner_id]
         );
         res.status(201).json(rows[0]);
