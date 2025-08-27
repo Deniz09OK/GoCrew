@@ -45,7 +45,7 @@ export default function Login() {
             <div className="w-1/2 h-screen flex flex-col justify-center items-center gap-4 bg-white">
                 {/* Logo ou icône de marque */}
                 <div className="inline-flex">
-                    <BrandWhiteIcon />
+                    <BrandWhiteIcon className="w-80 h-20" />
                 </div>
 
                 {/* Titre et sous-titre */}
@@ -118,7 +118,7 @@ export default function Login() {
 
                     {/* Bouton de connexion */}
                     <div className="relative my-4 w-md">
-                        <button className="btn w-full relative overflow-hidden h-10 p-3 bg-orange-500 rounded-[400px] inline-flex justify-center items-center gap-2.5 text-white cursor-pointer hover:bg-orange-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                        <button onClick={() => navigate("/home")} className="btn w-full relative overflow-hidden h-10 p-3 bg-orange-500 rounded-[400px] inline-flex justify-center items-center gap-2.5 text-white cursor-pointer hover:bg-orange-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                             Connexion
                         </button>
                     </div>

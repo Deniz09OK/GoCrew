@@ -1,12 +1,12 @@
 import Workspace from "./icons/Workspace.jsx";
 import Person from "./icons/Person.jsx";
 import {useContext, useEffect, useRef, useState} from "react";
-import NotificationCenter from "./notifications/NotificationCenter.jsx";
+// import NotificationCenter from "./notifications/NotificationCenter.jsx";
 import PropTypes from "prop-types";
-import useFetchUserData from "../hooks/useFetchUserData.jsx";
+// import useFetchUserData from "../hooks/useFetchUserData.jsx";
 import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
-import NotificationManager, {setNotificationManager} from "./notifications/NotificationManager.jsx";
+// import NotificationManager, {setNotificationManager} from "./notifications/NotificationManager.jsx";
 import {MenuContext} from "./MenuContext.jsx";
 
 Navbar.propTypes = {
@@ -58,10 +58,10 @@ export default function Navbar({ selectedWorkspace, workspaceColor }) {
                              <span>{selectedWorkspace.name}</span>
                          </div>
                      )}
-                <div className="w-20 flex items-center relative left-12 lg:left-254">
+                {/* <div className="w-20 flex items-center relative left-12 lg:left-254">
                     {userData && <NotificationCenter userId={userData.id}/>}
                     <NotificationManager ref={notificationManagerRef} />
-                </div>
+                </div> */}
                 <div className="max-md:invisible max-md:w-0 w-full flex p-2 text-black dark:text-white items-center justify-end gap-4 dark:bg-custom-pureDark">
                     <span>{greeting} {firstName || 'Utilisateur'}</span>
                     <button 
