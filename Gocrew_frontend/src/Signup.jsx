@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useState } from "react";
 import backgroundImage from "./assets/background_auth.png";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -14,9 +14,40 @@ export default function Login() {
     const [name, setName] = useState("");                    // Nom d'utilisateur
     const [password, setPassword] = useState("");            // Mot de passe
     const [rememberMe, setRememberMe] = useState(false);     // Option "Se souvenir de moi"
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     // pour la navigation
     const navigate = useNavigate();
 
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+        setSuccess("");
+        if (password !== confirmPassword) {
+            setError("Les mots de passe ne correspondent pas.");
+            return;
+        }
+        try {
+            const res = await fetch("http://localhost:3000/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password, username: name })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setSuccess("Inscription réussie ! Connectez-vous.");
+                setError("");
+                // Optionnel : rediriger automatiquement vers /login
+                // navigate("/login");
+            } else {
+                setError(data.error || "Erreur lors de l'inscription");
+            }
+        } catch (err) {
+            setError("Erreur réseau : " + err.message);
+        }
+    };
 
     return (
         <div className="w-full h-screen flex justify-center bg-white">
@@ -49,7 +80,7 @@ export default function Login() {
                 </div>
 
                 {/* --- CHAMPS DU FORMULAIRE --- */}
-                <div>
+                <form onSubmit={handleSubmit}>
                     {/* Champ : Nom d'utilisateur */}
                     <div className="flex flex-col items-start relative my-4 w-md">
                         <label className="block text-gray-800 text-sm font-semibold font-['Urbanist']" htmlFor="name">
@@ -117,8 +148,8 @@ export default function Login() {
                                 type={showPassword ? "text" : "password"}
                                 placeholder="****************"
                                 className="block w-full self-stretch text-gray-800 opacity-100 px-4 py-2.5 bg-orange-100 rounded-[16px] justify-start items-center gap-2.5 border border-gray-100 focus:outline-none focus:border-[#FF6300] transition duration-200 selection:bg-[#FF6300] selection:text-white"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
                             />
                             {/* Icône pour afficher/masquer le mot de passe */}
                             <button
@@ -130,14 +161,19 @@ export default function Login() {
                             </button>
                         </div>
                     </div>
-
+                    {error && (
+                        <div className="text-red-500 text-sm mb-2">{error}</div>
+                    )}
+                    {success && (
+                        <div className="text-green-500 text-sm mb-2">{success}</div>
+                    )}
                     {/* Bouton : S'inscrire */}
                     <div className="relative my-4 w-md">
                         <button onClick={() => navigate("/home")} className="w-full h-10 p-3 bg-orange-500 rounded-[400px] inline-flex justify-center items-center text-white hover:bg-orange-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                             S'inscrire
                         </button>
                     </div>
-                </div>
+                </form>
 
                 {/* --- AUTRES OPTIONS --- */}
                 <div className="relative w-md">
