@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil utilisateur</title>
+</head>
+<body>
+    <h1>Afficher le profil d'un utilisateur</h1>
+    <form id="profileForm">
+        <label>Email : <input type="email" name="email" required></label>
+        <button type="submit">Afficher mon profil</button>
+    </form>
+    <hr>
+    <div id="profileResult"></div>
+
+    <script>
+        const apiBase = "http://localhost:3000";
+
+        document.getElementById("profileForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = e.target.email.value;
+            document.getElementById("profileResult").textContent = "Chargement...";
+            try {
+                const res = await fetch(`${apiBase}/api/auth/user-by-email?email=${encodeURIComponent(email)}`);
+                if (!res.ok) {
+                    const err = await res.json();
+                    document.getElementById("profileResult").textContent = "Erreur : " + (err.error || res.statusText);
+                    return;
+                }
+                const user = await res.json();
+                document.getElementById("profileResult").innerHTML = `
+                    <h2>Profil</h2>
+                    <ul>
+                        <li><b>ID :</b> ${user.id}</li>
+                        <li><b>Email :</b> ${user.email}</li>
+                        <li><b>Nom d'utilisateur :</b> ${user.username || ''}</li>
+                        <li><b>Rôle :</b> ${user.role || ''}</li>
+                    </ul>
+                `;
+            } catch (err) {
+                document.getElementById("profileResult").textContent = "Erreur réseau : " + err.message;
+            }
+        });
+    </script>
+</body>
+</html>
