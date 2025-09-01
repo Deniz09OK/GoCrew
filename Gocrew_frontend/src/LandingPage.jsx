@@ -1,6 +1,9 @@
-import React from "react";
+import { useNavigate } from "react-router-dom";
+
 
 const LandingPage = () => {
+    const navigate = useNavigate();
+
     return (
         <div className="min-h-screen bg-orange-500 flex flex-col">
             {/* Navbar */}
@@ -10,10 +13,14 @@ const LandingPage = () => {
                     <a href="#" className="hover:underline">Accueil</a>
                     <a href="#" className="hover:underline">Notre services</a>
                     <a href="#" className="hover:underline">Nos Annonces</a>
-                    <button className="border px-4 py-1 rounded-full hover:bg-white hover:text-orange-500 transition">
+                    <button
+                        className="border px-4 py-1 rounded-full hover:bg-white hover:text-orange-500 transition"
+                        onClick={() => navigate("/signup")}
+                    >
                         S'inscrire
                     </button>
-                    <button className="bg-white text-orange-500 px-4 py-1 rounded-full shadow hover:bg-gray-100 transition">
+                    <button className="bg-white text-orange-500 px-4 py-1 rounded-full shadow hover:bg-gray-100 transition" 
+                            onClick={() => navigate("/login")}>
                         Se connecter
                     </button>
                 </nav>
@@ -44,9 +51,9 @@ const LandingPage = () => {
                 {/* Illustration */}
                 <div className="flex justify-center">
                     <img
-                        src="/public/image1.jpg"
+                        src="/public/Landingpage.png"
                         alt="Voyage illustration"
-                        className="max-w-md"
+                        className="w-[600px] max-w-full"
                     />
                 </div>
             </main>
