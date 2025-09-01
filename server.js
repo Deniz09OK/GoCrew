@@ -43,7 +43,15 @@ app.get('/profile', (req, res) => {
 });
 
 // Gestion des sockets temps réel (chat, notifications, etc.)
-require('./Gocrew_backend/socket/handler')(io);
+io.on('connection', (socket) => {
+    console.log('Nouvelle connexion : ' + socket.id);
+
+    socket.on('disconnect', () => {
+        console.log('Déconnexion : ' + socket.id);
+    });
+
+    // Autres gestionnaires d'événements pour les sockets
+});
 
 // Gestion d'erreur 404 pour les routes inconnues
 app.use((req, res) => {
