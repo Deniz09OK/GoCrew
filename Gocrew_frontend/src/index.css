@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap');
+@import "tailwindcss";
+
+
+:root {
+  font-family: "Urbanist", sans-serif;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #ffffff;
+  overflow-x: hidden;
+
+
+}
+/*  */
+
+
+

@@ -1,0 +1,223 @@
+import {useState } from "react";
+import backgroundImage from "./assets/background_auth.png";
+import { Link, useNavigate } from "react-router-dom";
+
+import Cookies from "js-cookie";
+import BrandWhiteIcon from "./components/icons/BrandWhiteIcon";
+import BrandIcon from "./components/icons/BrandIcon";
+import { Eye, EyeOff } from "lucide-react";
+
+export default function Login() {
+    // États pour les champs de formulaire et options
+    const [showPassword, setShowPassword] = useState(false); // Afficher ou cacher le mot de passe
+    const [email, setEmail] = useState("");                  // Email de l'utilisateur
+    const [name, setName] = useState("");                    // Nom d'utilisateur
+    const [password, setPassword] = useState("");            // Mot de passe
+    const [rememberMe, setRememberMe] = useState(false);     // Option "Se souvenir de moi"
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    // pour la navigation
+    const navigate = useNavigate();
+
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+        setSuccess("");
+        if (password !== confirmPassword) {
+            setError("Les mots de passe ne correspondent pas.");
+            return;
+        }
+        try {
+            const res = await fetch("http://localhost:3000/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password, username: name })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setSuccess("Inscription réussie ! Connectez-vous.");
+                setError("");
+                // Optionnel : rediriger automatiquement vers /login
+                // navigate("/login");
+            } else {
+                setError(data.error || "Erreur lors de l'inscription");
+            }
+        } catch (err) {
+            setError("Erreur réseau : " + err.message);
+        }
+    };
+
+    return (
+        <div className="w-full h-screen flex justify-center bg-white">
+            {/* --- SECTION GAUCHE : Image illustrative --- */}
+            <div className="w-1/2 h-screen bg-[#FFA325] flex items-center justify-center">
+                <div className="flex flex-col items-center justify-center space-y-6 gap-4">
+                    <img src={backgroundImage} alt="..." className="w-2/3 h-3/4" />
+                    <p className="text-white text-3xl font-extrabold text-center">
+                        Votre voyage, pensé pour vous.
+                    </p>
+                </div>
+            </div>
+
+            {/* --- SECTION DROITE : Formulaire d'inscription --- */}
+            <div className="w-1/2 h-screen flex flex-col justify-center items-center gap-4 bg-white">
+
+                {/* Logo de la marque */}
+                <div className="inline-flex">
+                    <BrandWhiteIcon />
+                </div>
+
+                {/* Titre et sous-titre */}
+                <div className="w-full self-stretch inline-flex flex-col justify-start items-center gap-2">
+                    <h1 className="justify-center text-gray-800 text-3xl font-bold font-['Urbanist'] leading-10">
+                        Inscription
+                    </h1>
+                    <p className="opacity-60 text-center justify-start text-gray-800 text-base font-normal font-['Urbanist'] leading-loose">
+                        Veuillez renseigner vos informations pour créer votre compte
+                    </p>
+                </div>
+
+                {/* --- CHAMPS DU FORMULAIRE --- */}
+                <form onSubmit={handleSubmit}>
+                    {/* Champ : Nom d'utilisateur */}
+                    <div className="flex flex-col items-start relative my-4 w-md">
+                        <label className="block text-gray-800 text-sm font-semibold font-['Urbanist']" htmlFor="name">
+                            Nom d’utilisateur
+                        </label>
+                        <input
+                            className="block w-full self-stretch text-gray-800 opacity-100 px-4 py-2.5 bg-orange-100 rounded-[16px] justify-start items-center gap-2.5 border border-gray-100 focus:outline-none focus:border-[#FF6300] transition duration-200 selection:bg-[#FF6300] selection:text-white"
+                            type="text"
+                            id="name"
+                            autoComplete="name"
+                            placeholder="John Doe"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Champ : Email */}
+                    <div className="flex flex-col items-start relative my-4 w-md">
+                        <label className="block text-gray-800 text-sm font-semibold font-['Urbanist']" htmlFor="email">
+                            Email
+                        </label>
+                        <input
+                            className="block w-full self-stretch text-gray-800 opacity-100 px-4 py-2.5 bg-orange-100 rounded-[16px] justify-start items-center gap-2.5 border border-gray-100 focus:outline-none focus:border-[#FF6300] transition duration-200 selection:bg-[#FF6300] selection:text-white"
+                            type="email"
+                            id="email"
+                            autoComplete="email"
+                            placeholder="user@domaine.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Champ : Mot de passe */}
+                    <div className="flex flex-col items-start relative my-4 w-md">
+                        <label className="block text-gray-800 text-sm font-semibold font-['Urbanist']" htmlFor="password">
+                            Mot de passe
+                        </label>
+                        <div className="relative w-full">
+                            <input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="****************"
+                                className="block w-full self-stretch text-gray-800 opacity-100 px-4 py-2.5 bg-orange-100 rounded-[16px] justify-start items-center gap-2.5 border border-gray-100 focus:outline-none focus:border-[#FF6300] transition duration-200 selection:bg-[#FF6300] selection:text-white"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                            {/* Icône d'affichage du mot de passe */}
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-gray-900"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Champ : Confirmation du mot de passe */}
+                    <div className="flex flex-col items-start relative my-4 w-md">
+                        <label className="block text-gray-800 text-sm font-semibold font-['Urbanist']">
+                            Saisir à nouveau votre mot de passe
+                        </label>
+                        <div className="relative w-full">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                placeholder="****************"
+                                className="block w-full self-stretch text-gray-800 opacity-100 px-4 py-2.5 bg-orange-100 rounded-[16px] justify-start items-center gap-2.5 border border-gray-100 focus:outline-none focus:border-[#FF6300] transition duration-200 selection:bg-[#FF6300] selection:text-white"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                            />
+                            {/* Icône pour afficher/masquer le mot de passe */}
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-gray-900"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
+                    </div>
+                    {error && (
+                        <div className="text-red-500 text-sm mb-2">{error}</div>
+                    )}
+                    {success && (
+                        <div className="text-green-500 text-sm mb-2">{success}</div>
+                    )}
+                    {/* Bouton : S'inscrire */}
+                    <div className="relative my-4 w-md">
+                        <button onClick={() => navigate("/home")} className="w-full h-10 p-3 bg-orange-500 rounded-[400px] inline-flex justify-center items-center text-white hover:bg-orange-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                            S'inscrire
+                        </button>
+                    </div>
+                </form>
+
+                {/* --- AUTRES OPTIONS --- */}
+                <div className="relative w-md">
+                    {/* Séparateur "ou" */}
+                    <div className="flex items-center justify-center my-4">
+                        <div className="flex-1 border-t border-gray-300"></div>
+                        <span className="px-4 text-gray-500">ou</span>
+                        <div className="flex-1 border-t border-gray-300"></div>
+                    </div>
+
+                    {/* Bouton : Inscription avec Google */}
+                    <button
+                        onClick
+                        className="w-full h-10 p-3 bg-white rounded-[400px] border border-gray-300 inline-flex justify-center items-center gap-2.5 text-gray-800 hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
+                    >
+                        {/* Icône Google */}
+                        <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g clip-path="url(#clip0_141_213)">
+                                    <path d="M4.43242 12.5863L3.73625 15.1852L1.19176 15.239C0.431328 13.8286 0 12.2148 0 10.5C0 8.84176 0.403281 7.27801 1.11812 5.90109H1.11867L3.38398 6.31641L4.37633 8.56813C4.16863 9.17363 4.05543 9.82363 4.05543 10.5C4.05551 11.2341 4.18848 11.9374 4.43242 12.5863Z" fill="#FBBB00" />
+                                    <path d="M19.8252 8.63187C19.94 9.2368 19.9999 9.86152 19.9999 10.5C19.9999 11.2159 19.9246 11.9143 19.7812 12.5879C19.2944 14.8802 18.0224 16.8819 16.2604 18.2984L16.2598 18.2978L13.4065 18.1522L13.0027 15.6313C14.1719 14.9456 15.0857 13.8725 15.567 12.5879H10.2197V8.63187H19.8252Z" fill="#518EF8" />
+                                    <path d="M16.26 18.2978L16.2606 18.2984C14.5469 19.6758 12.3699 20.5 10.0001 20.5C6.19189 20.5 2.88092 18.3714 1.19189 15.239L4.43256 12.5863C5.27705 14.8401 7.45123 16.4445 10.0001 16.4445C11.0957 16.4445 12.1221 16.1484 13.0029 15.6313L16.26 18.2978Z" fill="#28B446" />
+                                    <path d="M16.383 2.80219L13.1434 5.45437C12.2319 4.88461 11.1544 4.55547 10 4.55547C7.39344 4.55547 5.17859 6.23348 4.37641 8.56812L1.11871 5.90109H1.11816C2.78246 2.6923 6.1352 0.5 10 0.5C12.4264 0.5 14.6511 1.3643 16.383 2.80219Z" fill="#F14336" />
+                                </g>
+                                <defs>
+                                    <clipPath id="clip0_141_213">
+                                        <rect width="20" height="20" fill="white" transform="translate(0 0.5)" />
+                                    </clipPath>
+                                </defs>
+                            </svg>
+
+                        </svg>
+                        Google authentification
+                    </button>
+
+                    {/* Lien : Se connecter */}
+                    <button
+                        onClick={() => navigate("/login")}
+                        className="btn w-full relative overflow-hidden h-4 mt-6 inline-flex justify-center items-center gap-2.5 cursor-pointer text-gray-800 text-sm font-semibold font-['Urbanist'] leading-snug underline"
+                    >
+                        Se connecter
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
