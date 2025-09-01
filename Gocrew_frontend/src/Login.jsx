@@ -83,69 +83,47 @@ export default function Login() {
 
                 {/* FORMULAIRE */}
                 <div>
-                    <form onSubmit={handleSubmit}>
-                        {/* Champ email */}
-                        <div className="flex flex-col items-start relative my-4 w-md">
-                            <label className="block justify-start text-gray-800 text-sm font-semibold font-['Urbanist'] leading-snug" htmlFor="email">
-                                Email
-                            </label>
+                <form onSubmit={handleSubmit}>
+                    {/* Champ email */}
+                    <div className="flex flex-col items-start relative my-4 w-md">
+                        <label className="block justify-start text-gray-800 text-sm font-semibold font-['Urbanist'] leading-snug" htmlFor="email">
+                            Email
+                        </label>
+                        <input
+                            className="block w-full self-stretch text-gray-800 opacity-100 px-4 py-2.5 bg-orange-100 rounded-[16px] justify-start items-center gap-2.5 border border-gray-100 focus:outline-none focus:border-[#FF6300] transition duration-200 selection:bg-[#FF6300] selection:text-white"
+                            type="email"
+                            id="email"
+                            autoComplete="email"
+                            placeholder="user@domaine.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Champ mot de passe avec bouton d'affichage */}
+                    <div className="flex flex-col items-start relative my-4 w-md">
+                        <label className="block justify-start text-gray-800 text-sm font-semibold font-['Urbanist'] leading-snug" htmlFor="password">
+                            Mot de passe
+                        </label>
+                        <div className="relative w-full">
                             <input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="****************"
                                 className="block w-full self-stretch text-gray-800 opacity-100 px-4 py-2.5 bg-orange-100 rounded-[16px] justify-start items-center gap-2.5 border border-gray-100 focus:outline-none focus:border-[#FF6300] transition duration-200 selection:bg-[#FF6300] selection:text-white"
-                                type="email"
-                                id="email"
-                                autoComplete="email"
-                                placeholder="user@domaine.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                             />
-                        </div>
-
-                        {/* Champ mot de passe avec bouton d'affichage */}
-                        <div className="flex flex-col items-start relative my-4 w-md">
-                            <label className="block justify-start text-gray-800 text-sm font-semibold font-['Urbanist'] leading-snug" htmlFor="password">
-                                Mot de passe
-                            </label>
-                            <div className="relative w-full">
-                                <input
-                                    id="password"
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="****************"
-                                    className="block w-full self-stretch text-gray-800 opacity-100 px-4 py-2.5 bg-orange-100 rounded-[16px] justify-start items-center gap-2.5 border border-gray-100 focus:outline-none focus:border-[#FF6300] transition duration-200 selection:bg-[#FF6300] selection:text-white"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
-                                {/* Icône d'œil pour afficher/masquer le mot de passe */}
-                                <button
-                                    type="button"
-                                    className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-gray-900"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                >
-                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Case à cocher "Rester connecté" */}
-                        <div className="flex flex-col items-start relative my-4 w-md">
-                            <div className="inline-flex justify-start items-center gap-2.5">
-                                <input
-                                    type="checkbox"
-                                    id="rememberMe"
-                                    checked={rememberMe}
-                                    onChange={(e) => setRememberMe(e.target.checked)}
-                                />
-                                <label htmlFor="rememberMe" className="opacity-90 text-center justify-start text-gray-800 text-base font-normal font-['Urbanist'] leading-snug">
-                                    Rester connecté
-                                </label>
-                            </div>
-                        </div>
-
-                        {/* Bouton de connexion */}
-                        <div className="relative my-4 w-md">
-                            <button type="submit" className="btn w-full relative overflow-hidden h-10 p-3 bg-orange-500 rounded-[400px] inline-flex justify-center items-center gap-2.5 text-white cursor-pointer hover:bg-orange-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                                Connexion
+                            {/* Icône d'œil pour afficher/masquer le mot de passe */}
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-gray-900"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                             </button>
                         </div>
+                    </div>
 
                     {/* Case à cocher "Rester connecté" */}
                     <div className="flex flex-col items-start relative my-4 w-md">
@@ -164,11 +142,11 @@ export default function Login() {
 
                     {/* Bouton de connexion */}
                     <div className="relative my-4 w-md">
-                        <button onClick={() => navigate("/home")} className="btn w-full relative overflow-hidden h-10 p-3 bg-orange-500 rounded-[400px] inline-flex justify-center items-center gap-2.5 text-white cursor-pointer hover:bg-orange-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                        <button type="submit" className="btn w-full relative overflow-hidden h-10 p-3 bg-orange-500 rounded-[400px] inline-flex justify-center items-center gap-2.5 text-white cursor-pointer hover:bg-orange-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                             Connexion
                         </button>
                     </div>
-                </div>
+                </form>
 
                 {/* Lien mot de passe oublié */}
                 <div>
@@ -225,5 +203,6 @@ export default function Login() {
                 </div>
             </div>
         </div>
+    </div>
     );
 }
