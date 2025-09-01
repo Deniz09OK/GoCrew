@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion - GoCrew</title>
+</head>
+<body>
+  <div class="container">
+    <h1>Connexion</h1>
+    <form id="loginForm">
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="password" name="password" placeholder="Mot de passe" required>
+      <button type="submit" class="btn">Se connecter</button>
+    </form>
+    <div id="error"></div>
+    <p>Pas de compte ? <span class="link" onclick="window.location='register.html'">Inscription</span></p>
+  </div>
+  <script>
+    document.getElementById('loginForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        email: form.email.value,
+        password: form.password.value
+      };
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const errorDiv = document.getElementById('error');
+      if (res.ok) {
+        // Récupère le username et le stocke dans localStorage
+        const json = await res.json();
+        if (json.user && json.user.username) {
+          localStorage.setItem('gocrew_username', json.user.username);
+        }
+        window.location = '/welcome.html';
+      } else {
+        const err = await res.json();
+        errorDiv.textContent = err.error || 'Erreur inconnue';
+      }
+    };
+  </script>
+</body>
+</html>
