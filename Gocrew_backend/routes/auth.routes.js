@@ -77,4 +77,18 @@ router.post('/register', async (req, res) => {
     }
 });
 
+// Route pour récupérer un utilisateur par email (id et role)
+router.get('/user-by-email', async (req, res) => {
+    const { email } = req.query;
+    if (!email) return res.status(400).json({ error: "Email requis." });
+    try {
+        const result = await pool.query('SELECT id, email, username, role FROM users WHERE email = $1', [email]);
+        if (result.rows.length === 0)
+            return res.status(404).json({ error: "Utilisateur non trouvé." });
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;
