@@ -169,7 +169,7 @@ export default function Login() {
                     )}
                     {/* Bouton : S'inscrire */}
                     <div className="relative my-4 w-md">
-                        <button type="submit" className="w-full h-10 p-3 bg-orange-500 rounded-[400px] inline-flex justify-center items-center text-white hover:bg-orange-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                        <button onClick={() => navigate("/home")} className="w-full h-10 p-3 bg-orange-500 rounded-[400px] inline-flex justify-center items-center text-white hover:bg-orange-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                             S'inscrire
                         </button>
                     </div>

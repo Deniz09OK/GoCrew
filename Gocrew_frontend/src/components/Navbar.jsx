@@ -1,13 +1,13 @@
 import Workspace from "./icons/Workspace.jsx";
 import Person from "./icons/Person.jsx";
-import { useContext, useEffect, useRef, useState } from "react";
-import NotificationCenter from "./notifications/NotificationCenter.jsx";
+import {useContext, useEffect, useRef, useState} from "react";
+// import NotificationCenter from "./notifications/NotificationCenter.jsx";
 import PropTypes from "prop-types";
-import useFetchUserData from "../hooks/useFetchUserData.jsx";
+// import useFetchUserData from "../hooks/useFetchUserData.jsx";
 import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
-import NotificationManager, { setNotificationManager } from "./notifications/NotificationManager.jsx";
-import { MenuContext } from "./MenuContext.jsx";
+// import NotificationManager, {setNotificationManager} from "./notifications/NotificationManager.jsx";
+import {MenuContext} from "./MenuContext.jsx";
 
 Navbar.propTypes = {
     selectedWorkspace: PropTypes.object,
@@ -52,16 +52,16 @@ export default function Navbar({ selectedWorkspace, workspaceColor }) {
     return (
         <>
             <div className="flex h-18 lg:w-384 min-md:w-346 min-sm:326 justify-between border-b-2 border-gray-200 dark:border-violet-950 bg-white dark:bg-pureDark dark:text-white duration-1000 content-center z-10 gap-4">
-                {selectedWorkspace && (
-                    <div className={`${isMenuOpen ? "left-72" : "left-22"} w-20 gap-2 flex items-center relative left-32`}>
-                        <Workspace color={workspaceColor} />
-                        <span>{selectedWorkspace.name}</span>
-                    </div>
-                )}
-                <div className="w-20 flex items-center relative left-12 lg:left-254">
-                    {userData && <NotificationCenter userId={userData.id} />}
+                     {selectedWorkspace && (
+                         <div className={`${isMenuOpen ? "left-72": "left-22" } w-20 gap-2 flex items-center relative left-32`}>
+                             <Workspace color={workspaceColor} />
+                             <span>{selectedWorkspace.name}</span>
+                         </div>
+                     )}
+                {/* <div className="w-20 flex items-center relative left-12 lg:left-254">
+                    {userData && <NotificationCenter userId={userData.id}/>}
                     <NotificationManager ref={notificationManagerRef} />
-                </div>
+                </div> */}
                 <div className="max-md:invisible max-md:w-0 w-full flex p-2 text-black dark:text-white items-center justify-end gap-4 dark:bg-custom-pureDark">
                     <span>{greeting} {firstName || 'Utilisateur'}</span>
                     <button

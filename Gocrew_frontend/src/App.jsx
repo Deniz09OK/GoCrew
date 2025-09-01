@@ -3,22 +3,35 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Login.jsx";
 import Signup from "./Signup.jsx";
 import Forgot from "./Forgot.jsx";
-import LandingPage from "./LandingPage.jsx";
+import Dashboard from "./Dashbord.jsx";
+import Messages from "./pages/Messages.jsx";
+import Announcements from './pages/Announcements.jsx';
+import Trips from './pages/Trips.jsx';
+import HomeDashboard from './pages/HomeDashboard.jsx';
+import Home from './Home.jsx'
+import AppLayout from './components/AppLayout.jsx';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Page d’accueil */}
-        <Route path="/" element={<LandingPage />} />
+        {/* Redirection par défaut vers /login */}
 
         {/* Pages publiques */}
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot" element={<Forgot />} />
 
-        {/* Redirection si la route n’existe pas */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+
+        {/* Pages protégées */}
+        <Route element={<AppLayout />}>
+        <Route path="/home" element={<HomeDashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+       <Route path="/messages" element={<Messages />} />
+        <Route path="/announcements" element={<Announcements />} />
+        <Route path="/trips" element={<Trips />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   )

@@ -68,7 +68,7 @@ export default function Login() {
             <div className="w-1/2 h-screen flex flex-col justify-center items-center gap-4 bg-white">
                 {/* Logo ou icône de marque */}
                 <div className="inline-flex">
-                    <BrandWhiteIcon />
+                    <BrandWhiteIcon className="w-80 h-20" />
                 </div>
 
                 {/* Titre et sous-titre */}
@@ -147,11 +147,27 @@ export default function Login() {
                             </button>
                         </div>
 
-                        {/* Message d'erreur */}
-                        {error && (
-                            <div className="text-red-500 text-sm mb-2">{error}</div>
-                        )}
-                    </form>
+                    {/* Case à cocher "Rester connecté" */}
+                    <div className="flex flex-col items-start relative my-4 w-md">
+                        <div className="inline-flex justify-start items-center gap-2.5">
+                            <input
+                                type="checkbox"
+                                id="rememberMe"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                            />
+                            <label htmlFor="rememberMe" className="opacity-90 text-center justify-start text-gray-800 text-base font-normal font-['Urbanist'] leading-snug">
+                                Rester connecté
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Bouton de connexion */}
+                    <div className="relative my-4 w-md">
+                        <button onClick={() => navigate("/home")} className="btn w-full relative overflow-hidden h-10 p-3 bg-orange-500 rounded-[400px] inline-flex justify-center items-center gap-2.5 text-white cursor-pointer hover:bg-orange-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                            Connexion
+                        </button>
+                    </div>
                 </div>
 
                 {/* Lien mot de passe oublié */}
