@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Créer une Crew</title>
+<body>
+  <h1>Créer une Crew</h1>
+  <form id="crewForm">
+    <label>Nom
+      <input type="text" name="name" required>
+    </label>
+    <label>Description
+      <textarea name="description"></textarea>
+    </label>
+    <label>Destination
+      <input type="text" name="destination">
+    </label>
+    <label>Budget
+      <div class="budget-row">
+        <input type="number" name="budget" min="0" step="1" pattern="\d*" inputmode="numeric" required>
+        <select name="currency" required>
+          <option value="EUR">€ Euro</option>
+          <option value="USD">$ Dollar</option>
+        </select>
+      </div>
+    </label>
+    <label>Début du voyage
+      <input type="date" name="start_date">
+    </label>
+    <label>Fin du voyage
+      <input type="date" name="end_date">
+    </label>
+    <hr>
+    <h3>Inviter des personnes</h3>
+    <div id="invitedUsers"></div>
+    <button type="button" onclick="addInvitedUser()">Ajouter une personne</button>
+    <br>
+    <button type="submit">Créer la Crew</button>
+  </form>
+  <div id="result"></div>
+  <script>
+    function addInvitedUser() {
+      const div = document.createElement('div');
+      div.className = 'invited-user';
+      div.innerHTML = `
+        <input type="email" placeholder="Email de l'utilisateur" class="user-email" required>
+        <select class="user-role">
+          <option value="viewer">Viewer</option>
+          <option value="member">Member</option>
+        </select>
+        <button type="button" onclick="this.parentNode.remove()">Supprimer</button>
+      `;
+      document.getElementById('invitedUsers').appendChild(div);
+    }
+
+    document.getElementById('crewForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      // Budget: forcer entier
+      let budget = form.budget.value.replace(/[^0-9]/g, '');
+      if (!budget) budget = "0";
+      const data = {
+        name: form.name.value,
+        description: form.description.value,
+        destination: form.destination.value,
+        budget: parseInt(budget, 10),
+        currency: form.currency.value,
+        start_date: form.start_date.value,
+        end_date: form.end_date.value,
+        invited_users: []
+      };
+      document.querySelectorAll('.invited-user').forEach(div => {
+        const email = div.querySelector('.user-email').value;
+        const role = div.querySelector('.user-role').value;
+        if (email) data.invited_users.push({ email, role });
+      });
+
+      const res = await fetch('/api/create-crew', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const resultDiv = document.getElementById('result');
+      if (res.ok) {
+        try {
+          const json = await res.json();
+          resultDiv.innerHTML = `<span style="color:green">Crew créée ! ID: ${json.crew.id}</span>`;
+          // Redirection automatique vers la page du crew après 1s
+          setTimeout(() => {
+            window.location.href = `/crew/${json.crew.id}`;
+          }, 1000);
+        } catch (err) {
+          resultDiv.innerHTML = `<span style="color:red">Erreur: réponse inattendue du serveur.</span>`;
+        }
+      } else {
+        let errMsg = 'Erreur inconnue';
+        try {
+          const err = await res.json();
+          errMsg = err.error || errMsg;
+        } catch (e) {
+          errMsg = 'Erreur serveur ou route non trouvée';
+        }
+        resultDiv.innerHTML = `<span style="color:red">Erreur: ${errMsg}</span>`;
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Créer une Annonce Publique</title>
+</head>
+<body>
+  <h1>Créer une Annonce Publique</h1>
+  <form id="announcementForm">
+    <label>Titre
+      <input type="text" name="title" required>
+    </label>
+    <label>Description
+      <textarea name="description"></textarea>
+    </label>
+    <label>Destination
+      <input type="text" name="destination">
+    </label>
+    <label>Budget
+      <div class="budget-row">
+        <input type="number" name="budget" min="0" step="1" pattern="\d*" inputmode="numeric" required>
+        <select name="currency" required>
+          <option value="EUR">€ Euro</option>
+          <option value="USD">$ Dollar</option>
+        </select>
+      </div>
+    </label>
+    <label>Début du voyage
+      <input type="date" name="start_date">
+    </label>
+    <label>Fin du voyage
+      <input type="date" name="end_date">
+    </label>
+    <label>Votre rôle sur cette annonce
+      <select name="role" required>
+        <option value="viewer">Viewer (lecture seule)</option>
+        <option value="member">Member (peut modifier)</option>
+      </select>
+    </label>
+    <button type="submit">Créer l'annonce</button>
+  </form>
+  <div id="result"></div>
+  <script>
+    document.getElementById('announcementForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        title: form.title.value,
+        description: form.description.value,
+        destination: form.destination.value,
+        budget: form.budget.value,
+        start_date: form.start_date.value,
+        end_date: form.end_date.value,
+        role: form.role.value
+      };
+      const res = await fetch('/api/announcements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const resultDiv = document.getElementById('result');
+      if (res.ok) {
+        const json = await res.json();
+        resultDiv.innerHTML = `<span style="color:green">Annonce créée ! ID: ${json.announcement.id}</span>`;
+        setTimeout(() => {
+          window.location.href = `/announcement/${json.announcement.id}`;
+        }, 1000);
+      } else {
+        const err = await res.json();
+        resultDiv.innerHTML = `<span style="color:red">Erreur: ${err.error || 'Erreur inconnue'}</span>`;
+      }
+    };
+  </script>
+</body>
+</html>
+</body>
+</html>
