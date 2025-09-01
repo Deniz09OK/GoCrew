@@ -10,27 +10,27 @@ import Trips from './pages/Trips.jsx';
 import HomeDashboard from './pages/HomeDashboard.jsx';
 import Home from './Home.jsx'
 import AppLayout from './components/AppLayout.jsx';
+import LandingPage from './LandingPage.jsx'; // <-- Ajout ici
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Redirection par défaut vers /login */}
+        {/* Page d'accueil = LandingPage */}
+        <Route path="/" element={<LandingPage />} />
 
         {/* Pages publiques */}
-        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot" element={<Forgot />} />
 
-
         {/* Pages protégées */}
         <Route element={<AppLayout />}>
-        <Route path="/home" element={<HomeDashboard />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-       <Route path="/messages" element={<Messages />} />
-        <Route path="/announcements" element={<Announcements />} />
-        <Route path="/trips" element={<Trips />} />
+          <Route path="/home" element={<HomeDashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/announcements" element={<Announcements />} />
+          <Route path="/trips" element={<Trips />} />
         </Route>
       </Routes>
     </BrowserRouter>
