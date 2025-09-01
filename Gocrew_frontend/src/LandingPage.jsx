@@ -1,18 +1,30 @@
 import { useNavigate } from "react-router-dom";
 
+// Import Google Fonts Urbanist dans le head du document
+if (typeof document !== "undefined") {
+    const link = document.createElement("link");
+    link.href = "https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap";
+    link.rel = "stylesheet";
+    document.head.appendChild(link);
+}
 
 const LandingPage = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-orange-500 flex flex-col">
+        <div
+            className="min-h-screen flex flex-col"
+            style={{
+                backgroundColor: "#FFA325",
+                fontFamily: "'Urbanist', sans-serif"
+            }}
+        >
             {/* Navbar */}
             <header className="flex justify-between items-center px-8 py-4 text-white">
-                <h1 className="text-2xl font-bold">GoCREW!</h1>
+                <img src="/public/images/logowhite.png" alt="GoCREW logo" className="h-12" />
                 <nav className="flex gap-6 items-center">
                     <a href="#" className="hover:underline">Accueil</a>
                     <a href="#" className="hover:underline">Notre services</a>
-                    <a href="#" className="hover:underline">Nos Annonces</a>
                     <button
                         className="border px-4 py-1 rounded-full hover:bg-white hover:text-orange-500 transition"
                         onClick={() => navigate("/signup")}
@@ -38,14 +50,6 @@ const LandingPage = () => {
                         et intuitive pour planifier vos séjours, choisir vos activités et
                         partager vos idées en un seul endroit.
                     </p>
-                    <div className="mt-6 flex gap-4">
-                        <button className="bg-red-500 hover:bg-red-600 px-6 py-2 rounded-full shadow">
-                            Planifier mon voyage →
-                        </button>
-                        <button className="border border-white px-6 py-2 rounded-full hover:bg-white hover:text-orange-500 transition">
-                            En savoir plus
-                        </button>
-                    </div>
                 </div>
 
                 {/* Illustration */}
@@ -53,7 +57,7 @@ const LandingPage = () => {
                     <img
                         src="/public/Landingpage.png"
                         alt="Voyage illustration"
-                        className="w-[600px] max-w-full"
+                        className="w-[900px] max-w-full"
                     />
                 </div>
             </main>
