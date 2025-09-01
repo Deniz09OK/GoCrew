@@ -3,10 +3,15 @@ import { HomeIcon, Users, Calendar, MapPin, DollarSign } from 'lucide-react';
 import BreadcrumbHeader from '../components/BreadcrumbHeader';
 import SearchFilterBar from '../components/SearchFilterBar';
 import CreateTripModal from '../components/CreateTripModal';
+import StatsCard from '../components/StatsCard';
+import KanbanBoard from '../components/KanbanBoard';
 
 // Composant pour une carte de crew
-const CrewCard = ({ crew }) => (
-    <div className="bg-[#FDFDFF] border border-[#FFE7C5] rounded-3xl overflow-hidden hover:shadow-md transition-shadow">
+const CrewCard = ({ crew, onClick }) => (
+    <div 
+        className="bg-[#FDFDFF] border border-[#FFE7C5] rounded-3xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+        onClick={() => onClick(crew)}
+    >
         {/* Header avec image */}
         <div className="bg-gradient-to-r from-[#FF6300] to-[#FFA325] p-4 flex items-center justify-between">
             <div className="flex items-center">
@@ -64,6 +69,8 @@ export default function Trips() {
     const [error, setError] = useState(null);
     const [filter, setFilter] = useState('all'); // 'all', 'crews'
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedCrew, setSelectedCrew] = useState(null);
+    const [isKanbanOpen, setIsKanbanOpen] = useState(false);
 
     // Fonction pour récupérer les crews
     const fetchCrews = async () => {
@@ -94,6 +101,17 @@ export default function Trips() {
         console.log('Nouveau voyage créé:', newTrip);
         // Recharger les données
         fetchCrews();
+    };
+
+    // Fonction pour ouvrir le Kanban
+    const handleCrewClick = (crew) => {
+        setSelectedCrew(crew);
+        setIsKanbanOpen(true);
+    };
+
+    const handleKanbanClose = () => {
+        setIsKanbanOpen(false);
+        setSelectedCrew(null);
     };
 
     if (loading) {
@@ -148,15 +166,12 @@ export default function Trips() {
 
             {/* Statistiques */}
             <div className="flex justify-center mb-6 mt-3">
-                <div className="bg-[#FFA32514] border border-[#FFA32566] p-6 rounded-2xl w-80">
-                    <div className="flex items-center justify-center">
-                        <Users className="text-[#FF6300] mr-3" size={24} />
-                        <div className="text-center">
-                            <p className="text-sm text-[#FF6300] font-medium">Mes Crews</p>
-                            <p className="text-3xl font-bold text-[#FF6300]">{crews.length}</p>
-                        </div>
-                    </div>
-                </div>
+                <StatsCard 
+                    icon={Users}
+                    title="Mes Crews"
+                    count={crews.length}
+                    className="w-80"
+                />
             </div>
 
             {/* Contenu principal */}
@@ -173,7 +188,7 @@ export default function Trips() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredCrews.map(crew => (
-                                <CrewCard key={crew.id} crew={crew} />
+                                <CrewCard key={crew.id} crew={crew} onClick={handleCrewClick} />
                             ))}
                         </div>
                     </section>
@@ -203,6 +218,14 @@ export default function Trips() {
                 onClose={() => setIsModalOpen(false)}
                 onSuccess={handleTripCreated}
                 defaultType="crew"
+            />
+
+            {/* Kanban Board Modal */}
+            <KanbanBoard
+                isOpen={isKanbanOpen}
+                onClose={handleKanbanClose}
+                crew={selectedCrew}
+                type="crew"
             />
         </div>
     );

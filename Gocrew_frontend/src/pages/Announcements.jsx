@@ -4,10 +4,15 @@ import Close from "../components/icons/Close";
 import BreadcrumbHeader from "../components/BreadcrumbHeader";
 import SearchFilterBar from "../components/SearchFilterBar";
 import CreateTripModal from '../components/CreateTripModal';
+import StatsCard from '../components/StatsCard';
+import KanbanBoard from '../components/KanbanBoard';
 
 // Composant pour une carte d'annonce (même que dans Trips.jsx)
-const AnnouncementCard = ({ announcement }) => (
-    <div className="bg-[#FDFDFF] border border-[#FFE7C5] rounded-3xl overflow-hidden hover:shadow-md transition-shadow">
+const AnnouncementCard = ({ announcement, onClick }) => (
+    <div 
+        className="bg-[#FDFDFF] border border-[#FFE7C5] rounded-3xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+        onClick={() => onClick(announcement)}
+    >
         {/* Header avec image */}
         <div className="bg-gradient-to-r from-[#FF6300] to-[#FFA325] p-4 flex items-center justify-between">
             <div className="flex items-center">
@@ -70,6 +75,8 @@ export default function Announcements() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+    const [isKanbanOpen, setIsKanbanOpen] = useState(false);
 
     // Fonction pour récupérer les annonces avec les détails du crew
     const fetchAnnouncements = async () => {
@@ -120,6 +127,17 @@ export default function Announcements() {
         fetchAnnouncements();
     };
 
+    // Fonction pour ouvrir le Kanban
+    const handleAnnouncementClick = (announcement) => {
+        setSelectedAnnouncement(announcement);
+        setIsKanbanOpen(true);
+    };
+
+    const handleKanbanClose = () => {
+        setIsKanbanOpen(false);
+        setSelectedAnnouncement(null);
+    };
+
     if (loading) {
         return (
             <div className="bg-white rounded-xl shadow-md p-10 border-1 border-gray-300">
@@ -162,21 +180,20 @@ export default function Announcements() {
             />
 
             {/* Statistiques */}
-            <div className="bg-[#FFA32514] border border-[#FFA32566] p-4 rounded-2xl mb-6 mt-3">
-                <div className="flex items-center">
-                    <Globe className="text-[#FF6300] mr-2" size={20} />
-                    <div>
-                        <p className="text-sm text-[#FF6300] font-medium">Annonces disponibles</p>
-                        <p className="text-2xl font-bold text-[#FF6300]">{announcements.length}</p>
-                    </div>
-                </div>
+            <div className="flex justify-center mb-6 mt-3">
+                <StatsCard 
+                    icon={Globe}
+                    title="Annonces disponibles"
+                    count={announcements.length}
+                    className="w-80"
+                />
             </div>
 
             {/* Grille des annonces */}
             {announcements.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {announcements.map((announcement) => (
-                        <AnnouncementCard key={announcement.id} announcement={announcement} />
+                        <AnnouncementCard key={announcement.id} announcement={announcement} onClick={handleAnnouncementClick} />
                     ))}
                 </div>
             ) : (
@@ -201,6 +218,14 @@ export default function Announcements() {
                 onClose={() => setIsModalOpen(false)}
                 onSuccess={handleAnnouncementCreated}
                 defaultType="announcement"
+            />
+
+            {/* Kanban Board Modal */}
+            <KanbanBoard
+                isOpen={isKanbanOpen}
+                onClose={handleKanbanClose}
+                announcement={selectedAnnouncement}
+                type="announcement"
             />
         </div>
     );
