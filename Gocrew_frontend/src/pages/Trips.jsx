@@ -1,91 +1,232 @@
-import { HomeIcon } from 'lucide-react';
-import React from 'react';
-import BreadcrumbVector from '../components/icons/BreadcrumbVector';
+import React, { useState, useEffect } from 'react';
+import { HomeIcon, Users, Calendar, MapPin, DollarSign } from 'lucide-react';
 import BreadcrumbHeader from '../components/BreadcrumbHeader';
 import SearchFilterBar from '../components/SearchFilterBar';
-import ChatCommentDots from '../components/icons/ChatCommentDots';
+import CreateTripModal from '../components/CreateTripModal';
+import StatsCard from '../components/StatsCard';
+import KanbanBoard from '../components/KanbanBoard';
 
-// Données factices pour simuler les tâches de voyage
-const tasks = {
-    todo: [
-        { id: 1, title: "Faire une visite guidée de la ville", description: "Pour découvrir les lieux incontournables avec un local.", tag: "Activité", tagColor: "bg-yellow-200 text-yellow-800", date: "Dec 2 - 8", image: null, commentLength: 97 },
-        { id: 2, title: "Trouver des événements culturels sur place", description: "Concerts, expos ou festivals pendant les dates du séjour.", tag: "Activité", tagColor: "bg-yellow-200 text-yellow-800", date: "Dec 2 - 8", image: null, commentLength: 97 },
-        { id: 3, title: "Visiter la colonne", description: "Partir ensemble à St Perter, visiter la Colonne illuminé", tag: "Lieu à visiter", tagColor: "bg-pink-200 text-pink-800", date: "Dec 2 - 8", image: "/images/VisitColonne.png", commentLength: 97 },
-    ],
-    postponed: [
-        { id: 4, title: "Louer une voiture sur place", description: "À envisager si besoin de mobilité hors centre-ville.", tag: "Préparatif", tagColor: "bg-blue-200 text-blue-800", date: "Dec 2 - 8", image: null, commentLength: 97 },
-        { id: 5, title: "Visiter le Colisée", description: "Partir ensemble à Rome, visiter le Colisée", tag: "Lieu à visiter", tagColor: "bg-pink-200 text-pink-800", date: "Dec 2 - 8", image: "/images/VisiteColisee.png", commentLength: 97 },
-    ],
-    done: [
-        { id: 6, title: "Réserver les billets d'avion", description: "Comparer les prix et choisir les meilleurs horaires.", tag: "Préparatif", tagColor: "bg-blue-200 text-blue-800", date: "Dec 2 - 8", image: null, commentLength: 97 },
-        { id: 7, title: "Trouver un logement à Rome", description: "Airbnb, hôtel ou auberge : chaos factiori qui convient à tous.", tag: "Préparatif", tagColor: "bg-blue-200 text-blue-800", date: "Dec 2 - 8", image: null, commentLength: 97 },
-        { id: 8, title: "Acheter une assurance voyage", description: "Pour partir l'esprit tranquille en cas d'imprévus.", tag: "Préparatif", tagColor: "bg-blue-200 text-blue-800", date: "Dec 2 - 8", image: null, commentLength: 97 },
-    ]
-};
-
-const TaskCard = ({ task }) => (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-2">
-        {task.image && <img src={task.image} alt={task.title} className="w-full h-32 object-cover rounded-md mb-4" />}
-        <h4 className="font-bold text-xl text-gray-900 mb-1">{task.title}</h4>
-        {task.description && <p className="text-sm font-medium text-gray-500 mt-1">{task.description}</p>}
-        <div className="mt-4 text-sm text-gray-600">
-            <div>
-                <span className={`inline-flex items-center text-xs font-semibold px-2 py-1 rounded-lg mb-3 ${task.tagColor}`}>{task.tag}</span>
+// Composant pour une carte de crew
+const CrewCard = ({ crew, onClick }) => (
+    <div 
+        className="bg-[#FDFDFF] border border-[#FFE7C5] rounded-3xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+        onClick={() => onClick(crew)}
+    >
+        {/* Header avec image */}
+        <div className="bg-gradient-to-r from-[#FF6300] to-[#FFA325] p-4 flex items-center justify-between">
+            <div className="flex items-center">
+                <div className="bg-white bg-opacity-20 p-2 rounded-lg mr-3">
+                    <img 
+                        src="/images/Planner.png" 
+                        alt="Crew planning" 
+                        className="w-8 h-8 object-contain"
+                    />
+                </div>
+                <div className="text-white">
+                    <div className="flex items-center bg-white bg-opacity-20 px-2 py-1 rounded-full text-xs font-medium">
+                        <Users size={12} className="mr-1" />
+                        Crew
+                    </div>
+                </div>
             </div>
-            <div className="md:flex items-center justify-between">
-                <div className="flex items-center">
-                    <img src="/images/Avatar.png" alt="user" className="w-6 h-6 rounded-full -ml-2 border-2 border-white" />
-                    <p className="ml-2">{task.date}</p>
+            <div className="text-white text-sm">
+                <Calendar size={16} className="inline mr-1" />
+                {new Date(crew.start_date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+            </div>
+        </div>
+        
+        {/* Contenu principal */}
+        <div className="p-6">
+            <h3 className="font-bold text-xl text-gray-900 mb-2">{crew.name}</h3>
+            <p className="text-gray-600 mb-4 line-clamp-2">{crew.description}</p>
+            
+            <div className="space-y-2 mb-4">
+                <div className="flex items-center text-sm text-gray-500">
+                    <MapPin size={14} className="mr-2 text-[#FF6300]" />
+                    <span className="font-medium text-gray-700">{crew.destination}</span>
                 </div>
-                <div className="flex items-center">
-                    <ChatCommentDots />
-                    <p className="ml-2">{task.commentLength}</p >
+                <div className="flex items-center text-sm text-gray-500">
+                    <DollarSign size={14} className="mr-2 text-[#FF6300]" />
+                    <span className="font-medium text-[#FF6300]">{crew.budget}€ budget</span>
                 </div>
+            </div>
+            
+            <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-400">
+                    Créé le {new Date(crew.created_at).toLocaleDateString()}
+                </span>
+                <button className="bg-[#FF6300] text-white px-4 py-2 rounded-full hover:bg-[#FFA325] transition-colors text-sm">
+                    Voir détails
+                </button>
             </div>
         </div>
     </div>
 );
-
-const Column = ({ title, tasks, color }) => (
-    <div className="flex-1 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 gap-5">
-        <div className={`mb-5 rounded-2xl p-4 bg-white border-t-4`} style={{ borderColor: color }}>
-            <h3 className={`font-semibold flex items-center justify-between mb-1`}>
-                {title}
-                <span className={`w-3 h-3 rounded-full mr-2`} style={{ backgroundColor: color }}></span>
-            </h3>
-            <p className='text-start'>Nbr. d’activités : {tasks.length}</p>
-        </div>
-        <div className="text-start overflow-y-auto max-h-[500px] pr-2 my-scrollbar">
-            {tasks.map(task => <TaskCard key={task.id} task={task} />)}
-        </div>
-    </div>
-);
-
-
 
 export default function Trips() {
+    const [crews, setCrews] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [filter, setFilter] = useState('all'); // 'all', 'crews'
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedCrew, setSelectedCrew] = useState(null);
+    const [isKanbanOpen, setIsKanbanOpen] = useState(false);
+
+    // Fonction pour récupérer les crews
+    const fetchCrews = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/api/crews');
+            if (!response.ok) throw new Error('Erreur lors du chargement des crews');
+            const data = await response.json();
+            setCrews(data);
+        } catch (error) {
+            console.error('Erreur crews:', error);
+            setError(error.message);
+        }
+    };
+
+    // Charger les données au montage du composant
+    useEffect(() => {
+        const loadData = async () => {
+            setLoading(true);
+            await fetchCrews();
+            setLoading(false);
+        };
+        
+        loadData();
+    }, []);
+
+    // Fonction appelée après création d'un nouveau voyage
+    const handleTripCreated = (newTrip) => {
+        console.log('Nouveau voyage créé:', newTrip);
+        // Recharger les données
+        fetchCrews();
+    };
+
+    // Fonction pour ouvrir le Kanban
+    const handleCrewClick = (crew) => {
+        setSelectedCrew(crew);
+        setIsKanbanOpen(true);
+    };
+
+    const handleKanbanClose = () => {
+        setIsKanbanOpen(false);
+        setSelectedCrew(null);
+    };
+
+    if (loading) {
+        return (
+            <div className="bg-white rounded-xl shadow-md p-10 border-1 border-gray-300">
+                <div className="flex items-center justify-center h-64">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF6300] mx-auto mb-4"></div>
+                        <p className="text-gray-600">Chargement des voyages...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="bg-white rounded-xl shadow-md p-10 border-1 border-gray-300">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl">
+                    Erreur : {error}
+                </div>
+            </div>
+        );
+    }
+
+    // Filtrer les crews selon le filtre sélectionné
+    const filteredCrews = filter === 'all' ? crews : crews;
+
     return (
-        <div>
+        <div className="bg-white rounded-xl shadow-md p-10 border-1 border-gray-300">
             {/* Breadcrumb */}
             <BreadcrumbHeader
                 title="Voyages"
-                buttonText="+ Nouveau"
-                onButtonClick={() => setIsOpen(true)}
+                buttonText="+ Nouveau voyage"
+                onButtonClick={() => setIsModalOpen(true)}
             />
+            
             {/* Barre recherche + filtres */}
             <SearchFilterBar
                 filters={[
-                    { label: 'Catégorie', options: [{ value: 'all', label: 'Tout' }] },
-                    { label: 'Statut', options: [{ value: 'all', label: 'Tout' }] },
+                    { 
+                        label: 'Type', 
+                        options: [
+                            { value: 'all', label: 'Tous les crews' },
+                            { value: 'crews', label: 'Mes crews' }
+                        ]
+                    }
                 ]}
-                onSearch={() => console.log('Recherche')}
+                onFilterChange={(filters) => setFilter(filters.Type || 'all')}
+                onSearch={(searchTerm) => console.log('Recherche:', searchTerm)}
             />
-            <main className="flex flex-col md:flex-row md:flex-wrap gap-6 overflow-y-auto pr-2 my-scrollbar">
-                <Column title="A faire" tasks={tasks.todo} color="#280059" />
-                <Column title="Reporter" tasks={tasks.postponed} color="#447CFF" />
-                <Column title="Fait" tasks={tasks.done} color="#3AAA35" />
+
+            {/* Statistiques */}
+            <div className="flex justify-center mb-6 mt-3">
+                <StatsCard 
+                    icon={Users}
+                    title="Mes Crews"
+                    count={crews.length}
+                    className="w-80"
+                />
+            </div>
+
+            {/* Contenu principal */}
+            <main className="space-y-8">
+                {/* Section Crews */}
+                {filteredCrews.length > 0 && (
+                    <section>
+                        <div className="flex items-center mb-4">
+                            <Users className="text-[#FF6300] mr-2" size={20} />
+                            <h2 className="text-xl font-bold text-gray-900">Mes Crews</h2>
+                            <span className="ml-2 bg-[#FFA32514] text-[#FF6300] px-2 py-1 rounded-full text-sm border border-[#FFA32566]">
+                                {filteredCrews.length}
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredCrews.map(crew => (
+                                <CrewCard key={crew.id} crew={crew} onClick={handleCrewClick} />
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* Message si aucun voyage */}
+                {crews.length === 0 && (
+                    <div className="text-center py-12">
+                        <div className="mb-4">
+                            <Calendar size={48} className="text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-xl font-medium text-gray-900 mb-2">Aucun voyage pour le moment</h3>
+                            <p className="text-gray-600">Créez votre premier voyage ou rejoignez une annonce publique !</p>
+                        </div>
+                        <button 
+                            onClick={() => setIsModalOpen(true)}
+                            className="bg-[#FF6300] text-white px-6 py-3 rounded-full hover:bg-[#FFA325] transition-colors"
+                        >
+                            Créer mon premier voyage
+                        </button>
+                    </div>
+                )}
             </main>
 
+            {/* Modal de création de voyage */}
+            <CreateTripModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={handleTripCreated}
+                defaultType="crew"
+            />
+
+            {/* Kanban Board Modal */}
+            <KanbanBoard
+                isOpen={isKanbanOpen}
+                onClose={handleKanbanClose}
+                crew={selectedCrew}
+                type="crew"
+            />
         </div>
     );
 }

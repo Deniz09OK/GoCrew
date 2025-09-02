@@ -1,141 +1,232 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Globe, Calendar, MapPin, DollarSign } from 'lucide-react';
 import Close from "../components/icons/Close";
 import BreadcrumbHeader from "../components/BreadcrumbHeader";
 import SearchFilterBar from "../components/SearchFilterBar";
-import CardAnnouncement from "../components/CardAnnouncement";
+import CreateTripModal from '../components/CreateTripModal';
+import StatsCard from '../components/StatsCard';
+import KanbanBoard from '../components/KanbanBoard';
+
+// Composant pour une carte d'annonce (même que dans Trips.jsx)
+const AnnouncementCard = ({ announcement, onClick }) => (
+    <div 
+        className="bg-[#FDFDFF] border border-[#FFE7C5] rounded-3xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+        onClick={() => onClick(announcement)}
+    >
+        {/* Header avec image */}
+        <div className="bg-gradient-to-r from-[#FF6300] to-[#FFA325] p-4 flex items-center justify-between">
+            <div className="flex items-center">
+                <div className="bg-white bg-opacity-20 p-2 rounded-lg mr-3">
+                    <img 
+                        src="/images/Ticket.png" 
+                        alt="Travel ticket" 
+                        className="w-8 h-8 object-contain"
+                    />
+                </div>
+                <div className="text-white">
+                    <div className="flex items-center bg-white bg-opacity-20 px-2 py-1 rounded-full text-xs font-medium">
+                        <Globe size={12} className="mr-1" />
+                        Annonce
+                    </div>
+                </div>
+            </div>
+            {announcement.crew && (
+                <div className="text-white text-sm">
+                    <Calendar size={16} className="inline mr-1" />
+                    {new Date(announcement.crew.start_date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                </div>
+            )}
+        </div>
+        
+        {/* Contenu principal */}
+        <div className="p-6">
+            <h3 className="font-bold text-xl text-gray-900 mb-2">{announcement.title}</h3>
+            <p className="text-gray-600 mb-4 line-clamp-2">{announcement.description}</p>
+            
+            <div className="space-y-2 mb-4">
+                {announcement.crew && (
+                    <>
+                        <div className="flex items-center text-sm text-gray-500">
+                            <MapPin size={14} className="mr-2 text-[#FF6300]" />
+                            <span className="font-medium text-gray-700">{announcement.crew.destination}</span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500">
+                            <DollarSign size={14} className="mr-2 text-[#FF6300]" />
+                            <span className="font-medium text-[#FF6300]">{announcement.crew.budget}€ budget</span>
+                        </div>
+                    </>
+                )}
+            </div>
+            
+            <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-400">
+                    Publié le {new Date(announcement.posted_at).toLocaleDateString()}
+                </span>
+                <button className="bg-[#FF6300] text-white px-4 py-2 rounded-full hover:bg-[#FFA325] transition-colors text-sm">
+                    Rejoindre
+                </button>
+            </div>
+        </div>
+    </div>
+);
 
 export default function Announcements() {
-    const [isOpen, setIsOpen] = useState(false);
+    const [announcements, setAnnouncements] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+    const [isKanbanOpen, setIsKanbanOpen] = useState(false);
 
-    // Data mock
-    const annonces = [
-        { id: 1, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-        { id: 2, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-        { id: 3, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-        { id: 4, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-        { id: 5, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-        { id: 6, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-        { id: 7, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-        { id: 8, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-    ]
+    // Fonction pour récupérer les annonces avec les détails du crew
+    const fetchAnnouncements = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/api/announcements');
+            if (!response.ok) throw new Error('Erreur lors du chargement des annonces');
+            const announcements = await response.json();
+            
+            // Récupérer les détails du crew pour chaque annonce
+            const announcementsWithCrews = await Promise.all(
+                announcements.map(async (announcement) => {
+                    try {
+                        const crewResponse = await fetch(`http://localhost:3000/api/crews/${announcement.crew_id}`);
+                        if (crewResponse.ok) {
+                            const crew = await crewResponse.json();
+                            return { ...announcement, crew };
+                        }
+                        return announcement;
+                    } catch (error) {
+                        console.error('Erreur détail crew:', error);
+                        return announcement;
+                    }
+                })
+            );
+            
+            setAnnouncements(announcementsWithCrews);
+        } catch (error) {
+            console.error('Erreur annonces:', error);
+            setError(error.message);
+        }
+    };
+
+    // Charger les données au montage du composant
+    useEffect(() => {
+        const loadData = async () => {
+            setLoading(true);
+            await fetchAnnouncements();
+            setLoading(false);
+        };
+        
+        loadData();
+    }, []);
+
+    // Fonction appelée après création d'une nouvelle annonce
+    const handleAnnouncementCreated = (newAnnouncement) => {
+        console.log('Nouvelle annonce créée:', newAnnouncement);
+        // Recharger les données
+        fetchAnnouncements();
+    };
+
+    // Fonction pour ouvrir le Kanban
+    const handleAnnouncementClick = (announcement) => {
+        setSelectedAnnouncement(announcement);
+        setIsKanbanOpen(true);
+    };
+
+    const handleKanbanClose = () => {
+        setIsKanbanOpen(false);
+        setSelectedAnnouncement(null);
+    };
+
+    if (loading) {
+        return (
+            <div className="bg-white rounded-xl shadow-md p-10 border-1 border-gray-300">
+                <div className="flex items-center justify-center h-64">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF6300] mx-auto mb-4"></div>
+                        <p className="text-gray-600">Chargement des annonces...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="bg-white rounded-xl shadow-md p-10 border-1 border-gray-300">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl">
+                    Erreur : {error}
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="bg-white rounded-3xl border-1 border-gray-300 p-6">
-
+        <div className="bg-white rounded-xl shadow-md p-10 border-1 border-gray-300">
             {/* Breadcrumb */}
             <BreadcrumbHeader
-                title="Listes des annonces"
-                buttonText="+ Nouveau"
-                onButtonClick={() => setIsOpen(true)}
+                title="Liste des annonces"
+                buttonText="+ Nouvelle annonce"
+                onButtonClick={() => setIsModalOpen(true)}
             />
+
             {/* Barre recherche + filtres */}
             <SearchFilterBar
                 filters={[
-                    { label: 'Catégorie', options: [{ value: 'all', label: 'Tout' }] },
-                    { label: 'Statut', options: [{ value: 'all', label: 'Tout' }] },
+                    { label: 'Catégorie', options: [{ value: 'all', label: 'Toutes' }] },
+                    { label: 'Destination', options: [{ value: 'all', label: 'Toutes' }] },
                 ]}
-                onSearch={() => console.log('Recherche')}
+                onSearch={(searchTerm) => console.log('Recherche:', searchTerm)}
             />
 
-            {/* Grille des annonces */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mt-10">
-                {annonces.map((annonce) => (
-                    <CardAnnouncement key={annonce.id} annonce={annonce} />
-                ))}
+            {/* Statistiques */}
+            <div className="flex justify-center mb-6 mt-3">
+                <StatsCard 
+                    icon={Globe}
+                    title="Annonces disponibles"
+                    count={announcements.length}
+                    className="w-80"
+                />
             </div>
 
-            {/* Modal ajout annonce */}
-            {isOpen && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl w-full max-w-lg shadow-lg">
-                        <div className="bg-[#FF6300] py-4 px-3 flex items-center justify-between rounded-t-xl">
-                            <h2 className="text-2xl font-semibold text-[#F5F6EC]">Ajouter une annonce</h2>
-                            <button
-                                onClick={() => setIsOpen(false)}
-                                className="bg-white p-1 rounded-full text-2xl font-bold"
-                            >
-                                <Close />
-                            </button>
-                        </div>
-                        <div className="p-8 text-start">
-                            <form className="space-y-4">
-                                <div className="mb-4">
-                                    <label className="mb-2 text-base font-semibold text-gray-700" htmlFor="title">Nom du voyage</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Tokyo Drift"
-                                        className="w-full border border-gray-300 bg-[#F3F4F6] rounded-lg px-4 py-2 text-sm"
-                                    />
-                                </div>
-                                <div className="flex items-center justify-between gap-4 mb-4">
-                                    <div className="w-1/2">
-                                        <label className="mb-2 text-base font-semibold text-gray-700" htmlFor="membres">Membres</label>
-                                        <input
-                                            type="number"
-                                            placeholder="6"
-                                            className="w-full border border-gray-300 bg-[#F3F4F6] rounded-lg px-4 py-2 text-sm"
-                                        />
-                                    </div>
-                                    <div className="w-1/2">
-                                        <label className="mb-2 text-base font-semibold text-gray-700" htmlFor="budget">Budget par personne</label>
-                                        <input
-                                            type="number"
-                                            placeholder="600€"
-                                            className="w-full border border-gray-300 bg-[#F3F4F6] rounded-lg px-4 py-2 text-sm"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center justify-between gap-4 mb-4">
-                                    <div className="w-1/2">
-                                        <label className="mb-2 text-base font-semibold text-gray-700" htmlFor="date">Date du voyage</label>
-                                        <input
-                                            type="date"
-                                            placeholder="19/08/2025"
-                                            className="w-full border border-gray-300 bg-[#F3F4F6] rounded-lg px-4 py-2 text-sm"
-                                        />
-                                    </div>
-                                    <div className="w-1/2">
-                                        <label className="mb-2 text-base font-semibold text-gray-700" htmlFor="lieu">Lieu</label>
-                                        <select
-                                            className="w-full border border-gray-300 bg-[#F3F4F6] rounded-lg px-4 py-2 text-sm"
-                                        >
-                                            <option value="tokyo">Tokyo</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-
-                                <div className="mb-4">
-                                    <label className="mb-2 text-base font-semibold text-gray-700" htmlFor="description">Description du voyage</label>
-                                    <div className="bg-[#F3F4F6] p-4 rounded-xl">
-                                        <h4 className="mb-2 text-base font-medium text-gray-700" >Description <span className="font-normal"> (120 caractères max)</span></h4>
-
-                                        <textarea
-                                            className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm"
-                                            rows={4}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex justify-end gap-2 mt-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsOpen(false)}
-                                        className="text-base font-semibold px-4 py-2 rounded-lg border  bg-gray-400 text-white"
-                                    >
-                                        Annuler
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="text-base font-semibold px-4 py-2 rounded-lg bg-[#FF6300] text-white"
-                                    >
-                                        Publier
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+            {/* Grille des annonces */}
+            {announcements.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {announcements.map((announcement) => (
+                        <AnnouncementCard key={announcement.id} announcement={announcement} onClick={handleAnnouncementClick} />
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center py-12">
+                    <div className="mb-4">
+                        <Globe size={48} className="text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-xl font-medium text-gray-900 mb-2">Aucune annonce disponible</h3>
+                        <p className="text-gray-600">Soyez le premier à publier une annonce de voyage !</p>
                     </div>
+                    <button 
+                        onClick={() => setIsModalOpen(true)}
+                        className="bg-[#FF6300] text-white px-6 py-3 rounded-full hover:bg-[#FFA325] transition-colors"
+                    >
+                        Créer ma première annonce
+                    </button>
                 </div>
             )}
+
+            {/* Modal de création d'annonce */}
+            <CreateTripModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={handleAnnouncementCreated}
+                defaultType="announcement"
+            />
+
+            {/* Kanban Board Modal */}
+            <KanbanBoard
+                isOpen={isKanbanOpen}
+                onClose={handleKanbanClose}
+                announcement={selectedAnnouncement}
+                type="announcement"
+            />
         </div>
     );
 }
