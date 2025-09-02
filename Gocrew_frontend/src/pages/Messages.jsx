@@ -2,33 +2,59 @@ import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import MessageBubble from "../components/MessageBubble";
 import MessageInput from "../components/MessageInput";
-import { motion } from "framer-motion";
 
-
-const socket = io("http://localhost:3000");
+// Configuration Socket.IO - connexion directe au backend local
+const socket = io("http://localhost:3000", {
+    transports: ['websocket', 'polling'],
+    timeout: 20000,
+    forceNew: true
+});
 
 export default function Messages() {
     const [messages, setMessages] = useState([]);
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
-        // Charger l'historique
-        socket.on("chat_history", (history) => {
-            setMessages(history);
+        console.log("🔄 Initialisation Socket.IO...");
+        
+        socket.on("connect", () => {
+            console.log("✅ Connecté au serveur Socket.IO avec l'ID:", socket.id);
         });
-
-        // Nouveaux messages en temps réel
+        
+        socket.on("disconnect", (reason) => {
+            console.log("❌ Déconnecté du serveur Socket.IO. Raison:", reason);
+        });
+        
+        socket.on("connect_error", (error) => {
+            console.error("🚨 Erreur de connexion Socket.IO:", error);
+        });
+        
+        socket.on("chat_history", (history) => {
+            console.log("📜 Historique reçu:", history);
+            setMessages(history || []);
+        });
+        
         socket.on("receive_message", (msg) => {
+            console.log("📨 Message reçu:", msg);
             setMessages((prev) => [...prev, msg]);
         });
-
+        
+        // Test de connexion au montage
+        if (socket.connected) {
+            console.log("🟢 Socket déjà connecté");
+        } else {
+            console.log("🔴 Socket en cours de connexion...");
+        }
+        
         return () => {
+            socket.off("connect");
+            socket.off("disconnect");
+            socket.off("connect_error");
             socket.off("chat_history");
             socket.off("receive_message");
         };
     }, []);
 
-    // Scroll auto quand messages change
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
@@ -39,47 +65,42 @@ export default function Messages() {
             time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             sender: "me",
         };
-        setMessages((prev) => [...prev, msg]); // Update local state immediately
+        console.log("📤 Envoi du message:", msg);
+        setMessages((prev) => [...prev, msg]);
         socket.emit("send_message", msg);
     };
 
     return (
         <div className="flex flex-col h-full bg-gradient-to-b from-[#FFF9F3] to-white">
-            {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b bg-white shadow-sm">
                 <h2 className="text-lg font-semibold text-gray-800">Messagerie</h2>
-                <span className="text-xs text-green-500">● En ligne</span>
+                <span className={`text-xs ${socket.connected ? 'text-green-500' : 'text-red-500'}`}>
+                    ● {socket.connected ? 'En ligne' : 'Hors ligne'}
+                </span>
             </div>
-
-            {/* Messages list */}
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 scrollbar-thin scrollbar-thumb-gray-300">
                 {messages.length === 0 ? (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex flex-col items-center justify-center h-full text-gray-400"
-                    >
-                        <p className="text-sm">Aucun message pour l’instant 👋</p>
+                    <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                        <p className="text-sm">Aucun message pour l'instant 👋</p>
                         <p className="text-xs">Commence la conversation ci-dessous</p>
-                    </motion.div>
+                    </div>
                 ) : (
                     <>
                         {messages.map((m, i) => (
                             <MessageBubble
                                 key={i}
-                                text={m.text}
+                                message={m.text}
                                 time={m.time}
-                                isSender={m.sender === "me"}
+                                isOwnMessage={m.sender === "me"}
                             />
                         ))}
-                        {/* Référence pour scroll auto */}
                         <div ref={messagesEndRef} />
                     </>
                 )}
             </div>
-
-            {/* Input */}
-            <MessageInput onSend={handleSend} />
+            <div className="px-4 py-3 bg-white border-t">
+                <MessageInput onSend={handleSend} />
+            </div>
         </div>
     );
 }

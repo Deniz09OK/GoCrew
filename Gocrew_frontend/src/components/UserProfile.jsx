@@ -1,20 +1,20 @@
-import { motion } from "framer-motion";
+import * as framerMotion from "framer-motion";
 import { User, Mail, Calendar } from "lucide-react";
 
 export default function UserProfile({ user }) {
     return (
         <div className="flex flex-col h-full bg-gradient-to-b from-[#FFF9F3] to-white p-6">
             {/* Titre */}
-            <motion.h2
+            <framerMotion.motion.h2
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-2xl font-bold text-gray-800 mb-6"
             >
                 Mon Profil
-            </motion.h2>
+            </framerMotion.motion.h2>
 
             {/* Carte utilisateur */}
-            <motion.div
+            <framerMotion.motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="max-w-md w-full mx-auto"
@@ -56,7 +56,7 @@ export default function UserProfile({ user }) {
                         </div>
                     </div>
                 </div>
-            </motion.div>
+            </framerMotion.motion.div>
         </div>
     );
 }

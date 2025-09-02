@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+
 // Importation des icônes existantes
 import Home from './icons/Home';
 // // Importation des icônes existantes
@@ -18,54 +19,36 @@ import Add from './icons/AddIcon';
 export default function AppLayout() {
     const [isVoyagesOpen, setIsVoyagesOpen] = useState(true); // Default to open as per screenshot
     const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State for the main sidebar
-    const [voyages, setVoyages] = useState([]);
+
+    // Ajoute un state pour l'utilisateur réel
+    const [user, setUser] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchRecentCrews = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) return;
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setUser(null);
+            return;
+        }
+        fetch("http://localhost:3000/api/auth/me", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => setUser(data))
+            .catch(() => setUser(null));
+    }, []);         
 
-                const response = await fetch('http://localhost:3000/api/crews', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+    // Simuler un utilisateur connecté (à remplacer par vos données utilisateur réelles)
+    // const user = {
+    //     name: "Anne-cha"
+    // };
 
-                if (response.ok) {
-                    const crews = await response.json();
-                    console.log('Crews fetched:', crews); // Debug
-                    // Prendre les 3 plus récents crews
-                    const recentCrews = crews.slice(0, 3);
-                    const formattedVoyages = recentCrews.map((crew, index) => ({
-                        id: crew.id || crew.crew_id, // Support both id formats
-                        name: crew.name || crew.crew_name || 'Voyage sans nom',
-                        color: ['bg-blue-400', 'bg-red-400', 'bg-green-400'][index % 3]
-                    }));
-                    console.log('Formatted voyages:', formattedVoyages); // Debug
-                    setVoyages(formattedVoyages);
-                } else {
-                    console.error('Failed to fetch crews');
-                    // Fallback vers des données par défaut si l'API échoue
-                    setVoyages([
-                        { id: 'default1', name: 'Mes voyages', color: 'bg-blue-400' },
-                        { id: 'default2', name: 'Voyages récents', color: 'bg-red-400' },
-                        { id: 'default3', name: 'Voyages favoris', color: 'bg-green-400' },
-                    ]);
-                }
-            } catch (error) {
-                console.error('Error fetching crews:', error);
-                // Fallback vers des données par défaut en cas d'erreur
-                setVoyages([
-                    { id: 'default1', name: 'Mes voyages', color: 'bg-blue-400' },
-                    { id: 'default2', name: 'Voyages récents', color: 'bg-red-400' },
-                    { id: 'default3', name: 'Voyages favoris', color: 'bg-green-400' },
-                ]);
-            }
-        };
-
-        fetchRecentCrews();
-    }, []);
+    // Affichage d'un loader si user non chargé
+    if (!user) {
+        return <div>Chargement du profil utilisateur...</div>;
+    }
 
     return (
         <div className="flex h-screen bg-gray-50 text-gray-800 font-sans">
@@ -145,27 +128,7 @@ export default function AppLayout() {
                                 <AirPlane />
                                 {isSidebarOpen && <span className="ml-4">Voyages</span>}
                             </NavLink>
-                            {isSidebarOpen && <Link to="/trips" className="p-1.5 bg-white text-primary rounded-full flex items-center justify-center hover:bg-gray-200 ring-2 ring-secondary">
-                                <span className="text-2xl"><Add /></span>
-                            </Link>}
                         </div>
-                        {isSidebarOpen && <div className="mt-2 ml-8 pl-3 space-y-2 flex flex-col">
-                            {voyages.map((voyage, index) => (
-                                <div key={`${voyage.id}-${index}`} className="flex items-center justify-between">
-                                    <NavLink
-                                        to={`/trips/${voyage.id}`}
-                                        className={({ isActive }) =>
-                                            `flex items-center py-1 text-white hover:text-gray-200 ${isActive ? "font-bold" : ""
-                                            }`
-                                        }
-                                    >
-                                        <span className={`w-2 h-2 rounded-full mr-3 ${voyage.color}`}></span>
-                                        {voyage.name}
-                                    </NavLink>
-                                    <EllipsisVerticalIcon className="text-white cursor-pointer" />
-                                </div>
-                            ))}
-                        </div>}
 
                     </div>
                 </nav>

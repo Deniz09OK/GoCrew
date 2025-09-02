@@ -10,5 +10,6 @@ router.use('/messages', require('./MessagesRoutes'));
 router.use('/announcements', require('./AnnoucementsRoutes'));
 router.use('/announcements', require('./AnnouncementParticipantsRoutes'));
 router.use('/documents', require('./DocumentsRoutes'));
+router.use('/migration', require('./MigrationRoutes'));
 
 module.exports = router;
