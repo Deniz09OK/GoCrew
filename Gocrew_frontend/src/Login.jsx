@@ -34,22 +34,9 @@ export default function Login() {
                 body: JSON.stringify({ email, password })
             });
             const data = await res.json();
-            console.log('=== LOGIN DEBUG ===');
-            console.log('Response from backend:', data);
-            console.log('Token received:', data.token);
-            console.log('User received:', data.user);
-            console.log('==================');
-            
             if (res.ok) {
-                // Stocke le token ET les données utilisateur dans localStorage
+                // Stocke le token dans localStorage ou cookies
                 localStorage.setItem("token", data.token);
-                localStorage.setItem("user", JSON.stringify(data.user));
-                
-                console.log('=== STORED IN LOCALSTORAGE ===');
-                console.log('Stored token:', localStorage.getItem("token"));
-                console.log('Stored user:', localStorage.getItem("user"));
-                console.log('=============================');
-                
                 // Redirige vers la page d'accueil ou dashboard
                 navigate("/home");
             } else {

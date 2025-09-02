@@ -5,8 +5,8 @@ const io = require('socket.io')(http);
 const cors = require('cors');
 require('dotenv').config();
 
-// Import all routes through index.js
-const routes = require('./Gocrew_backend/routes/index');
+const authRoutes = require('./Gocrew_backend/routes/auth.routes');
+const CrewRoutes = require('./Gocrew_backend/routes/CrewRoutes');
 
 // CORS : autorise toutes les origines pour les tests locaux (sécurise en prod !)
 app.use(cors({
@@ -15,8 +15,9 @@ app.use(cors({
 
 app.use(express.json()); // Middleware pour parser le JSON des requêtes
 
-// Routes API - use all routes from index.js
-app.use('/api', routes);
+// Routes API
+app.use('/api/auth', authRoutes);
+app.use('/api/crews', CrewRoutes);
 
 // Sert les fichiers statiques (HTML, JS, CSS, etc.)
 app.use(express.static(__dirname));
@@ -42,7 +43,15 @@ app.get('/profile', (req, res) => {
 });
 
 // Gestion des sockets temps réel (chat, notifications, etc.)
-require('./Gocrew_backend/socket/handler')(io);
+io.on('connection', (socket) => {
+    console.log('Nouvelle connexion : ' + socket.id);
+
+    socket.on('disconnect', () => {
+        console.log('Déconnexion : ' + socket.id);
+    });
+
+    // Autres gestionnaires d'événements pour les sockets
+});
 
 // Gestion d'erreur 404 pour les routes inconnues
 app.use((req, res) => {

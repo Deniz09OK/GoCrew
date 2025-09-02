@@ -2,9 +2,16 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const pool = require('../models/db');
+const { Pool } = require('pg');
 
 require('dotenv').config();
+
+// Récupère la chaîne de connexion à la base de données depuis .env
+const connectionString = process.env.DATABASE_URL;
+console.log('DATABASE_URL chargée :', connectionString);
+
+// Initialise le pool de connexions PostgreSQL
+const pool = new Pool({ connectionString });
 
 // Route de connexion utilisateur (login)
 router.post('/login', async (req, res) => {
@@ -26,11 +33,12 @@ router.post('/login', async (req, res) => {
         if (!valid)
             return res.status(401).json({ error: 'Mot de passe incorrect.' });
 
-        // Génère un token JWT valable 24 heures
+        // Génère un token JWT valable 2 minute
         const token = jwt.sign(
             { id: user.id, email: user.email, username: user.username },
             process.env.JWT_SECRET,
-            { expiresIn: '24h' }
+            
+            { expiresIn: '2m' }
         );
         res.json({ token, user: { id: user.id, email: user.email, username: user.username } });
     } catch (err) {
