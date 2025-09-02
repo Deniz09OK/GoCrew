@@ -2,9 +2,16 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const pool = require('../models/db');
+const { Pool } = require('pg');
 
 require('dotenv').config();
+
+// Récupère la chaîne de connexion à la base de données depuis .env
+const connectionString = process.env.DATABASE_URL;
+console.log('DATABASE_URL chargée :', connectionString);
+
+// Initialise le pool de connexions PostgreSQL
+const pool = new Pool({ connectionString });
 
 // Route de connexion utilisateur (login)
 router.post('/login', async (req, res) => {
@@ -26,11 +33,12 @@ router.post('/login', async (req, res) => {
         if (!valid)
             return res.status(401).json({ error: 'Mot de passe incorrect.' });
 
-        // Génère un token JWT valable 24 heures
+        // Génère un token JWT valable 2 minute
         const token = jwt.sign(
             { id: user.id, email: user.email, username: user.username },
             process.env.JWT_SECRET,
-            { expiresIn: '24h' }
+            
+            { expiresIn: '2m' }
         );
         res.json({ token, user: { id: user.id, email: user.email, username: user.username } });
     } catch (err) {
@@ -80,6 +88,29 @@ router.get('/user-by-email', async (req, res) => {
         res.json(result.rows[0]);
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+
+// Route pour récupérer l'utilisateur courant à partir du token JWT
+router.get('/me', async (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: "Token manquant." });
+
+    const token = authHeader.split(' ')[1];
+    if (!token) return res.status(401).json({ error: "Token manquant." });
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        // Recherche l'utilisateur en base
+        const result = await pool.query(
+            'SELECT id, email, username, role, avatar_url FROM users WHERE id = $1',
+            [decoded.id]
+        );
+        if (result.rows.length === 0)
+            return res.status(404).json({ error: "Utilisateur non trouvé." });
+        res.json(result.rows[0]);
+    } catch (err) {
+        return res.status(401).json({ error: "Token invalide ou expiré." });
     }
 });
 

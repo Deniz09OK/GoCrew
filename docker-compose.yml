@@ -37,12 +37,6 @@ services:
     command: ["npm", "run", "dev"]
     environment:
       - CHOKIDAR_USEPOLLING=true
-    networks:
-      - gocrew_network
 
 volumes:
   gocrew_data:
-
-networks:
-  gocrew_network:
-    driver: bridge

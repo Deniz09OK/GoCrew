@@ -36,6 +36,15 @@ export default function HomeDashboard() {
       />
     </div>
   </div>
+    {/* Image à droite */}
+    <div className="w-full md:w-1/2 mt-6 md:mt-0 flex justify-center md:justify-end">
+      <img
+        src="/images/Background.png"
+        alt="Illustration voyage"
+        className="max-h-52 sm:max-h-64 md:max-h-72"
+      />
+    </div>
+  </div>
 
   {/* Illustration en bas */}
   <div className="mt-8 md:mt-10 flex justify-center">

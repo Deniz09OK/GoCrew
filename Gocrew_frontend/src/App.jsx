@@ -10,7 +10,8 @@ import Trips from './pages/Trips.jsx';
 import HomeDashboard from './pages/HomeDashboard.jsx';
 import Home from './Home.jsx'
 import AppLayout from './components/AppLayout.jsx';
-import LandingPage from './LandingPage.jsx'; // <-- Ajout ici
+import LandingPage from './LandingPage.jsx'; // 
+import UserPage from "./pages/Userpage.jsx";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/messages" element={<Messages />} />
           <Route path="/announcements" element={<Announcements />} />
           <Route path="/trips" element={<Trips />} />
+          <Route path="/profil" element={<UserPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
