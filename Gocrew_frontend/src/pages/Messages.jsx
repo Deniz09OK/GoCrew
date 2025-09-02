@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import MessageBubble from "../components/MessageBubble";
 import MessageInput from "../components/MessageInput";
@@ -39,6 +39,7 @@ export default function Messages() {
             time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             sender: "me",
         };
+        setMessages((prev) => [...prev, msg]); // Update local state immediately
         socket.emit("send_message", msg);
     };
 
