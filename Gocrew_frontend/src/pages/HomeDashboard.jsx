@@ -3,7 +3,7 @@ import ArrowRight from "../components/icons/ArrowRight";
 
 export default function HomeDashboard() {
   return (
-   <div className="flex flex-col items-center justify-center">
+  <div className="flex flex-col items-center justify-center">
   {/* Bloc principal */}
   <div className="bg-white border border-gray-300 text-start rounded-3xl shadow-md py-8 md:py-12 px-4 md:px-16 flex flex-col md:flex-row items-center justify-between w-full">
     

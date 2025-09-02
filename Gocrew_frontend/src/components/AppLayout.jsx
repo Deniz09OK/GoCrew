@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 // Importation des icônes existantes
 import Home from './icons/Home';
@@ -20,30 +20,59 @@ export default function AppLayout() {
     const [isVoyagesOpen, setIsVoyagesOpen] = useState(true); // Default to open as per screenshot
     const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State for the main sidebar
 
+    // Ajoute un state pour l'utilisateur réel
+    const [user, setUser] = useState(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setUser(null);
+            return;
+        }
+        fetch("http://localhost:3000/api/auth/me", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => setUser(data))
+            .catch(() => setUser(null));
+    }, []);
+
     const voyages = [
         { id: 'barcelone', name: 'Voyage barcelone', color: 'bg-blue-400' },
         { id: 'espagne', name: 'Voyage Espagne', color: 'bg-red-400' },
         { id: 'italie', name: 'Voyage Italie', color: 'bg-green-400' },
     ];
+    // Simuler un utilisateur connecté (à remplacer par vos données utilisateur réelles)
+    // const user = {
+    //     name: "Anne-cha"
+    // };
+
+    // Affichage d'un loader si user non chargé
+    if (!user) {
+        return <div>Chargement du profil utilisateur...</div>;
+    }
+
     return (
         <div className="flex h-screen bg-gray-50 text-gray-800 font-sans">
             {/* Barre latérale */}
             <aside
                 className={`bg-[#FF9A0F] text-white flex flex-col p-4 flex-shrink-0 transition-all duration-300 ease-in-out
-      ${isSidebarOpen ? 'w-96' : ' md:w-24'} 
+    ${isSidebarOpen ? 'w-96' : 'md:w-24'} 
     `}
             >
-                {/* Logo et bouton Tab
-                Icon */}
+                {/* Logo et bouton Tab Icon */}
                 <div
                     className={`flex items-center mb-12 ${isSidebarOpen ? "justify-between" : "justify-center"
                         }`}
                 >
                     {/* Logo visible uniquement si ouvert */}
                     <BrandWhiteIcon
-                        className={`${!isSidebarOpen ? "none" : "w-72 h-10"}`}
+                        className={`${!isSidebarOpen ? "hidden" : "w-72 h-10"}`}
                     />
-                    {!isSidebarOpen &&<img src="/images/LogoGroup.png" alt="" />}
+                    {!isSidebarOpen && <img src="/images/LogoGroup.png" alt="" />}
 
                     {/* Bouton toggle toujours visible */}
                     <div
@@ -54,28 +83,24 @@ export default function AppLayout() {
                     </div>
                 </div>
 
-
                 {/* Menu principal */}
                 <nav className="flex flex-col space-y-3">
-                    {/* Section Acceuil */}
-
+                    {/* Section Accueil */}
                     <NavLink
                         to="/home"
                         className={({ isActive }) =>
-                            `flex items-center text-base font-extrabold p-4 mb-6 rounded-full transition-colors ${!isSidebarOpen && 'justify-center py-5'} ${isActive ? 'bg-white text-[#FF6300]' : 'bg-[#E37A3766] text-white'}`
+                            `flex items-center text-base font-extrabold p-4 mb-6 rounded-full transition-colors ${!isSidebarOpen ? 'justify-center py-5' : ''} ${isActive ? 'bg-white text-[#FF6300]' : 'bg-[#E37A3766] text-white'}`
                         }
-
                     >
                         <Home className="w-6 h-6" />
                         {isSidebarOpen && <span className="ml-4 text-lg">Accueil</span>}
                     </NavLink>
                     <hr className='bg-[#FFCB8E] border-1 rounded-full mb-10' />
                     {/* Section Messagerie  */}
-
                     <NavLink
                         to="/messages"
                         className={({ isActive }) =>
-                            `flex items-center text-base font-extrabold p-4 mb-3 rounded-full transition-colors ${!isSidebarOpen && 'justify-center py-5'} ${isActive
+                            `flex items-center text-base font-extrabold p-4 mb-3 rounded-full transition-colors ${!isSidebarOpen ? 'justify-center py-5' : ''} ${isActive
                                 ? "bg-white text-[#FF6300]"
                                 : "bg-[#E37A3766] text-white"
                             }`
@@ -84,13 +109,11 @@ export default function AppLayout() {
                         <Messages className="w-5 h-5" />
                         {isSidebarOpen && <span className="ml-4">Messagerie</span>}
                     </NavLink>
-
                     {/* Section Annonces  */}
-
                     <NavLink
                         to="/announcements"
                         className={({ isActive }) =>
-                            `flex items-center text-base font-extrabold p-4 mb-3 rounded-full transition-colors ${!isSidebarOpen && 'justify-center py-5'} ${isActive ? 'bg-white text-[#FF6300]' : 'bg-[#E37A3766] text-white'}`
+                            `flex items-center text-base font-extrabold p-4 mb-3 rounded-full transition-colors ${!isSidebarOpen ? 'justify-center py-5' : ''} ${isActive ? 'bg-white text-[#FF6300]' : 'bg-[#E37A3766] text-white'}`
                         }
                     >
                         <MenuBoard />
@@ -104,7 +127,7 @@ export default function AppLayout() {
                             <NavLink
                                 to="/trips"
                                 className={({ isActive }) =>
-                                    `flex items-center text-base font-extrabold p-4 mr-3 w-full rounded-full transition-colors ${!isSidebarOpen && 'justify-center mr-0 p-5'} ${isActive ? 'bg-white text-[#FF6300]' : 'bg-[#E37A3766] text-white'}`
+                                    `flex items-center text-base font-extrabold p-4 mr-3 w-full rounded-full transition-colors ${!isSidebarOpen ? 'justify-center mr-0 p-5' : ''} ${isActive ? 'bg-white text-[#FF6300]' : 'bg-[#E37A3766] text-white'}`
                                 }
                             >
                                 <AirPlane />
@@ -154,10 +177,14 @@ export default function AppLayout() {
                 <header className="bg-white shadow-sm p-4 flex justify-end items-center border-b-1 border-b-gray-300">
                     <div className="flex items-center">
                         <BellDot className='mr-2' />
-                        <div className='bg-[#FFA32533] rounded-full w-10 h-10 flex items-center justify-center mr-4'>
+                        <div
+                            className='bg-[#FFA32533] rounded-full w-10 h-10 flex items-center justify-center mr-4 cursor-pointer'
+                            onClick={() => navigate("/profil")}
+                            title="Voir mon profil"
+                        >
                             <PersonIcon />
                         </div>
-                        <span className="mr-4 font-medium">John Bigo</span>
+                        <span className="mr-4 font-medium">{user.username}</span>
                     </div>
                 </header>
                 <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#FFA32514] md:p-8 p-4">
