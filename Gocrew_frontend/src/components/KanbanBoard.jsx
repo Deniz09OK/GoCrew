@@ -3,99 +3,194 @@ import { X, Plus, MoreVertical, Calendar, Users, MapPin } from 'lucide-react';
 
 const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
     const [tasks, setTasks] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [newTaskColumn, setNewTaskColumn] = useState(null);
     const [newTaskText, setNewTaskText] = useState('');
 
-    // Données d'exemple pour les tâches
+    // Charger les tâches depuis l'API
     useEffect(() => {
-        if (isOpen) {
-            setTasks([
-                {
-                    id: 1,
-                    title: "Faire une visite guidée de la ville",
-                    description: "Pour découvrir les lieux incontournables avec un local",
-                    status: "À faire",
-                    priority: "Active",
-                    assignee: "Dec 2 - 8",
-                    likes: 97,
-                    color: "purple"
-                },
-                {
-                    id: 2,
-                    title: "Trouver des événements culturels sur place",
-                    description: "Concerts, expos ou festivals pendant les dates du séjour",
-                    status: "À faire",
-                    priority: "Active",
-                    assignee: "Dec 2 - 8",
-                    likes: 97,
-                    color: "orange"
-                },
-                {
-                    id: 3,
-                    title: "Visiter la colonne",
-                    description: "Pour ressembler à St-Renter, visiter la Colonne Humaine",
-                    status: "À faire",
-                    priority: "Active",
-                    assignee: "Dec 2 - 8",
-                    likes: 97,
-                    color: "orange"
-                },
-                {
-                    id: 4,
-                    title: "Louer une voiture sur place",
-                    description: "À envisager si besoin de mobilité hors centre-ville",
-                    status: "Reporter",
-                    priority: "Préparatif",
-                    assignee: "Dec 2 - 8",
-                    likes: 97,
-                    color: "blue"
-                },
-                {
-                    id: 5,
-                    title: "Visiter le Colisée",
-                    description: "Point emblématique à Rome, visiter le Colisée",
-                    status: "Reporter",
-                    priority: "LIVE A VISITER",
-                    assignee: "Dec 2 - 8",
-                    likes: 97,
-                    color: "blue",
-                    image: "/images/VisiteColisee.png"
-                },
-                {
-                    id: 6,
-                    title: "Réserver les billets d'avion",
-                    description: "Compare les prix et choisis les meilleurs horaires",
-                    status: "Fait",
-                    priority: "Préparatif",
-                    assignee: "Dec 2 - 8",
-                    likes: 97,
-                    color: "green"
-                },
-                {
-                    id: 7,
-                    title: "Trouver un logement à Rome",
-                    description: "Airbnb, hôtel ou auberge - choisir l'option qui convient à tous",
-                    status: "Fait",
-                    priority: "Préparatif",
-                    assignee: "Dec 2 - 8",
-                    likes: 97,
-                    color: "green"
-                },
-                {
-                    id: 8,
-                    title: "Acheter une assurance voyage",
-                    description: "Pour partir l'esprit tranquille en cas d'imprévus",
-                    status: "Fait",
-                    priority: "Préparatif",
-                    assignee: "Dec 2 - 8",
-                    likes: 97,
-                    color: "green"
-                }
-            ]);
+        if (isOpen && (crew?.id || announcement?.crew_id)) {
+            fetchTasks();
         }
-    }, [isOpen]);
+    }, [isOpen, crew, announcement]);
+
+    const fetchTasks = async () => {
+        setLoading(true);
+        try {
+            const crewId = crew?.id || announcement?.crew_id;
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:3000/api/tasks/crew/${crewId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setTasks(data);
+            } else {
+                console.error('Erreur lors du chargement des tâches');
+                // Fallback avec des données de test si l'API échoue
+                setTasks([
+                    {
+                        id: 1,
+                        title: "Faire une visite guidée de la ville",
+                        description: "Pour découvrir les lieux incontournables avec un local",
+                        status: "À faire",
+                        priority: "Active",
+                        assignee: "Dec 2 - 8",
+                        likes: 97,
+                        color: "purple"
+                    },
+                    {
+                        id: 2,
+                        title: "Trouver des événements culturels sur place",
+                        description: "Concerts, expos ou festivals pendant les dates du séjour",
+                        status: "À faire",
+                        priority: "Active",
+                        assignee: "Dec 2 - 8",
+                        likes: 97,
+                        color: "orange"
+                    },
+                    {
+                        id: 3,
+                        title: "Réserver les billets d'avion",
+                        description: "Compare les prix et choisis les meilleurs horaires",
+                        status: "Fait",
+                        priority: "Préparatif",
+                        assignee: "Dec 2 - 8",
+                        likes: 97,
+                        color: "green"
+                    }
+                ]);
+            }
+        } catch (error) {
+            console.error('Erreur réseau:', error);
+            // Fallback avec données de test
+            setTasks([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Créer une nouvelle tâche
+    const createTask = async (column, title, description = "Nouvelle tâche ajoutée") => {
+        try {
+            const crewId = crew?.id || announcement?.crew_id;
+            const token = localStorage.getItem('token');
+            const dbStatus = statusMapping[column]; // Convertir vers le statut base de données
+            
+            const response = await fetch('http://localhost:3000/api/tasks', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    crew_id: crewId,
+                    title,
+                    description,
+                    status: dbStatus,
+                    priority: "Préparatif"
+                })
+            });
+
+            if (response.ok) {
+                const newTask = await response.json();
+                setTasks(prevTasks => [...prevTasks, newTask]);
+                return newTask;
+            } else {
+                console.error('Erreur lors de la création de la tâche');
+            }
+        } catch (error) {
+            console.error('Erreur réseau:', error);
+        }
+    };
+
+    // Mettre à jour une tâche
+    const updateTask = async (taskId, updates) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updates)
+            });
+
+            if (response.ok) {
+                const updatedTask = await response.json();
+                setTasks(prevTasks => 
+                    prevTasks.map(task => task.id === taskId ? updatedTask : task)
+                );
+                return updatedTask;
+            }
+        } catch (error) {
+            console.error('Erreur lors de la mise à jour:', error);
+        }
+    };
+
+    // Supprimer une tâche
+    const deleteTask = async (taskId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+            }
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+        }
+    };
+
+    // Liker une tâche
+    const toggleLike = async (taskId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:3000/api/tasks/${taskId}/like`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const updatedTask = await response.json();
+                setTasks(prevTasks => 
+                    prevTasks.map(task => task.id === taskId ? updatedTask : task)
+                );
+            }
+        } catch (error) {
+            console.error('Erreur lors du like:', error);
+        }
+    };
 
     const columns = ['À faire', 'Reporter', 'Fait'];
+    
+    // Mapping entre les statuts de l'interface et de la base de données
+    const statusMapping = {
+        'À faire': 'todo',
+        'Reporter': 'in_progress', 
+        'Fait': 'done'
+    };
+    
+    const reverseStatusMapping = {
+        'todo': 'À faire',
+        'in_progress': 'Reporter',
+        'done': 'Fait'
+    };
+    
     const columnColors = {
         'À faire': 'border-purple-200 bg-purple-50',
         'Reporter': 'border-blue-200 bg-blue-50', 
@@ -109,22 +204,13 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
     };
 
     const getTasksByColumn = (column) => {
-        return tasks.filter(task => task.status === column);
+        const dbStatus = statusMapping[column];
+        return tasks.filter(task => task.status === dbStatus);
     };
 
-    const addNewTask = (column) => {
+    const addNewTask = async (column) => {
         if (newTaskText.trim()) {
-            const newTask = {
-                id: Date.now(),
-                title: newTaskText,
-                description: "Nouvelle tâche ajoutée",
-                status: column,
-                priority: "Préparatif",
-                assignee: "Dec 2 - 8",
-                likes: 0,
-                color: column === 'À faire' ? 'purple' : column === 'Reporter' ? 'blue' : 'green'
-            };
-            setTasks([...tasks, newTask]);
+            await createTask(column, newTaskText);
             setNewTaskText('');
             setNewTaskColumn(null);
         }
@@ -169,6 +255,11 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
 
                 {/* Kanban Board */}
                 <div className="p-6 overflow-auto max-h-[calc(90vh-200px)]">
+                    {loading ? (
+                        <div className="flex justify-center items-center h-64">
+                            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
+                        </div>
+                    ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 min-h-[500px]">
                         {columns.map((column) => (
                             <div key={column} className={`rounded-xl border-2 p-4 ${columnColors[column]}`}>
@@ -221,13 +312,29 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center">
                                                     <div className="w-6 h-6 bg-orange-400 rounded-full mr-2 flex items-center justify-center">
-                                                        <span className="text-xs text-white font-medium">D</span>
+                                                        <span className="text-xs text-white font-medium">
+                                                            {task.first_name ? task.first_name.charAt(0) : 'U'}
+                                                        </span>
                                                     </div>
-                                                    <span className="text-xs text-gray-500">{task.assignee}</span>
+                                                    <span className="text-xs text-gray-500">
+                                                        {task.first_name ? `${task.first_name} ${task.last_name}` : task.assignee || 'Non assigné'}
+                                                    </span>
                                                 </div>
-                                                <div className="flex items-center text-gray-400">
-                                                    <span className="text-xs mr-1">♡</span>
-                                                    <span className="text-xs">{task.likes}</span>
+                                                <div className="flex items-center space-x-2">
+                                                    <button
+                                                        onClick={() => toggleLike(task.id)}
+                                                        className="flex items-center text-gray-400 hover:text-red-500 transition-colors"
+                                                    >
+                                                        <span className="text-xs mr-1">♡</span>
+                                                        <span className="text-xs">{task.likes || 0}</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => deleteTask(task.id)}
+                                                        className="text-gray-400 hover:text-red-500 transition-colors"
+                                                        title="Supprimer la tâche"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -273,6 +380,7 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
                             </div>
                         ))}
                     </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -1,19 +1,6 @@
 version: '3.8'
 
 services:
-  # Suppression du service db - on utilise PostgreSQL local
-  # db:
-  #   image: postgres:15
-  #   container_name: gocrew-db
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - gocrew_data:/var/lib/postgresql/data
-  #   networks:
-  #     - gocrew_network
-
   backend:
     build:
       context: .
@@ -23,10 +10,8 @@ services:
       - "3000:3000"
     env_file:
       - .env
-    # depends_on:
-    #   - db
     environment:
-      - DB_HOST=host.docker.internal  # Utilise PostgreSQL local
+      - DB_HOST=host.docker.internal 
       - DB_PORT=5432
       - DB_NAME=gocrew
       - DB_USER=postgres
