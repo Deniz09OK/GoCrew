@@ -5,7 +5,7 @@ exports.getTasksByCrewId = async (req, res) => {
     const { crewId } = req.params;
     try {
         const { rows } = await pool.query(
-            `SELECT t.*, u.first_name, u.last_name 
+            `SELECT t.*, u.username, u.email 
              FROM tasks t 
              LEFT JOIN users u ON t.assigned_to = u.id 
              WHERE t.crew_id = $1 
@@ -31,7 +31,17 @@ exports.getAllTasks = async (req, res) => {
 
 // Créer une nouvelle tâche
 exports.createTask = async (req, res) => {
-    const { crew_id, title, description, status = 'À faire', priority = 'Préparatif', assigned_to, due_date, file_url } = req.body;
+    const { crew_id, title, description, status = 'todo', priority = 'Préparatif', assigned_to, due_date, file_url } = req.body;
+    
+    // Liste des priorités valides
+    const validPriorities = [
+        'Préparatif', 'Active', 'Paiement', 'Logement', 'Transport', 
+        'Lieux à visiter', 'Restaurant', 'Shopping', 'Activités', 
+        'Urgent', 'Documents'
+    ];
+    
+    // Validation de la priorité
+    const finalPriority = validPriorities.includes(priority) ? priority : 'Préparatif';
     
     try {
         // Obtenir la position suivante pour cette colonne
@@ -44,7 +54,7 @@ exports.createTask = async (req, res) => {
         const { rows } = await pool.query(
             `INSERT INTO tasks (crew_id, title, description, status, priority, assigned_to, due_date, file_url, position)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-            [crew_id, title, description, status, priority, assigned_to, due_date, file_url, position]
+            [crew_id, title, description, status, finalPriority, assigned_to, due_date, file_url, position]
         );
         
         res.status(201).json(rows[0]);
@@ -58,6 +68,16 @@ exports.createTask = async (req, res) => {
 exports.updateTask = async (req, res) => {
     const { id } = req.params;
     const { title, description, status, priority, assigned_to, due_date, file_url, position, likes } = req.body;
+    
+    // Liste des priorités valides
+    const validPriorities = [
+        'Préparatif', 'Active', 'Paiement', 'Logement', 'Transport', 
+        'Lieux à visiter', 'Restaurant', 'Shopping', 'Activités', 
+        'Urgent', 'Documents'
+    ];
+    
+    // Validation de la priorité si elle est fournie
+    const finalPriority = priority && validPriorities.includes(priority) ? priority : priority;
     
     try {
         const { rows } = await pool.query(
@@ -74,7 +94,7 @@ exports.updateTask = async (req, res) => {
                  updated_at = CURRENT_TIMESTAMP
              WHERE id = $10 
              RETURNING *`,
-            [title, description, status, priority, assigned_to, due_date, file_url, position, likes, id]
+            [title, description, status, finalPriority, assigned_to, due_date, file_url, position, likes, id]
         );
         
         if (rows.length === 0) {

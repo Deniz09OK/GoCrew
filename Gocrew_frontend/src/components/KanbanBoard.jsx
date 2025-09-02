@@ -6,6 +6,16 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
     const [loading, setLoading] = useState(false);
     const [newTaskColumn, setNewTaskColumn] = useState(null);
     const [newTaskText, setNewTaskText] = useState('');
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+    const [newTaskDetails, setNewTaskDetails] = useState({
+        title: '',
+        description: '',
+        priority: 'Préparatif',
+        column: ''
+    });
+    const [editingPriorityTaskId, setEditingPriorityTaskId] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingTask, setEditingTask] = useState(null);
 
     // Charger les tâches depuis l'API
     useEffect(() => {
@@ -75,7 +85,7 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
     };
 
     // Créer une nouvelle tâche
-    const createTask = async (column, title, description = "Nouvelle tâche ajoutée") => {
+    const createTask = async (column, title, description = "Nouvelle tâche ajoutée", priority = "Préparatif") => {
         try {
             const crewId = crew?.id || announcement?.crew_id;
             const token = localStorage.getItem('token');
@@ -92,7 +102,7 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
                     title,
                     description,
                     status: dbStatus,
-                    priority: "Préparatif"
+                    priority: priority
                 })
             });
 
@@ -198,9 +208,17 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
     };
 
     const priorityColors = {
-        'Active': 'bg-orange-500',
         'Préparatif': 'bg-gray-400',
-        'LIVE A VISITER': 'bg-purple-500'
+        'Active': 'bg-orange-500',
+        'Paiement': 'bg-green-500',
+        'Logement': 'bg-blue-500',
+        'Transport': 'bg-indigo-500',
+        'Lieux à visiter': 'bg-purple-500',
+        'Restaurant': 'bg-red-500',
+        'Shopping': 'bg-pink-500',
+        'Activités': 'bg-yellow-500',
+        'Urgent': 'bg-red-600',
+        'Documents': 'bg-teal-500'
     };
 
     const getTasksByColumn = (column) => {
@@ -214,6 +232,81 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
             setNewTaskText('');
             setNewTaskColumn(null);
         }
+    };
+
+    // Ouvrir le modal pour une tâche détaillée
+    const openTaskModal = (column) => {
+        setNewTaskDetails({
+            title: '',
+            description: '',
+            priority: 'Préparatif',
+            column: column
+        });
+        setIsTaskModalOpen(true);
+    };
+
+    // Créer une tâche avec tous les détails
+    const createDetailedTask = async () => {
+        if (newTaskDetails.title.trim()) {
+            await createTask(
+                newTaskDetails.column, 
+                newTaskDetails.title, 
+                newTaskDetails.description || "Nouvelle tâche ajoutée",
+                newTaskDetails.priority
+            );
+            setIsTaskModalOpen(false);
+            setNewTaskDetails({
+                title: '',
+                description: '',
+                priority: 'Préparatif',
+                column: ''
+            });
+        }
+    };
+
+    // Mettre à jour la priorité d'une tâche
+    const updateTaskPriority = async (taskId, newPriority) => {
+        try {
+            await updateTask(taskId, { priority: newPriority });
+            setEditingPriorityTaskId(null);
+        } catch (error) {
+            console.error('Erreur lors de la mise à jour de la priorité:', error);
+        }
+    };
+
+    // Ouvrir le modal d'édition
+    const openEditModal = (task) => {
+        setEditingTask({
+            id: task.id,
+            title: task.title,
+            description: task.description || '',
+            priority: task.priority,
+            status: task.status
+        });
+        setIsEditModalOpen(true);
+    };
+
+    // Sauvegarder les modifications d'une tâche
+    const saveTaskEdits = async () => {
+        if (editingTask && editingTask.title.trim()) {
+            try {
+                await updateTask(editingTask.id, {
+                    title: editingTask.title,
+                    description: editingTask.description,
+                    priority: editingTask.priority
+                });
+                setIsEditModalOpen(false);
+                setEditingTask(null);
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde:', error);
+            }
+        }
+    };
+
+    // Fermer le modal d'édition
+    const closeEditModal = () => {
+        setIsEditModalOpen(false);
+        setEditingTask(null);
     };
 
     if (!isOpen) return null;
@@ -280,12 +373,40 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
                                 {/* Tasks */}
                                 <div className="space-y-3">
                                     {getTasksByColumn(column).map((task) => (
-                                        <div key={task.id} className="bg-white rounded-xl p-4 shadow-sm border hover:shadow-md transition-shadow cursor-pointer">
+                                        <div 
+                                            key={task.id} 
+                                            className="bg-white rounded-xl p-4 shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
+                                            onClick={() => openEditModal(task)}
+                                        >
                                             {/* Priority Badge */}
                                             <div className="flex items-center justify-between mb-3">
-                                                <span className={`px-2 py-1 rounded-full text-xs text-white font-medium ${priorityColors[task.priority] || 'bg-gray-400'}`}>
-                                                    {task.priority}
-                                                </span>
+                                                {editingPriorityTaskId === task.id ? (
+                                                    <select
+                                                        value={task.priority}
+                                                        onChange={(e) => updateTaskPriority(task.id, e.target.value)}
+                                                        onBlur={() => setEditingPriorityTaskId(null)}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="px-2 py-1 rounded-full text-xs font-medium border focus:outline-none focus:ring-2 focus:ring-[#FF6300]"
+                                                        autoFocus
+                                                    >
+                                                        {Object.keys(priorityColors).map((priority) => (
+                                                            <option key={priority} value={priority}>
+                                                                {priority}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                ) : (
+                                                    <span 
+                                                        className={`px-2 py-1 rounded-full text-xs text-white font-medium cursor-pointer hover:opacity-80 transition-opacity ${priorityColors[task.priority] || 'bg-gray-400'}`}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setEditingPriorityTaskId(task.id);
+                                                        }}
+                                                        title="Cliquer pour changer la catégorie"
+                                                    >
+                                                        {task.priority}
+                                                    </span>
+                                                )}
                                                 <MoreVertical size={16} className="text-gray-400" />
                                             </div>
 
@@ -322,14 +443,20 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
                                                 </div>
                                                 <div className="flex items-center space-x-2">
                                                     <button
-                                                        onClick={() => toggleLike(task.id)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            toggleLike(task.id);
+                                                        }}
                                                         className="flex items-center text-gray-400 hover:text-red-500 transition-colors"
                                                     >
                                                         <span className="text-xs mr-1">♡</span>
                                                         <span className="text-xs">{task.likes || 0}</span>
                                                     </button>
                                                     <button
-                                                        onClick={() => deleteTask(task.id)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            deleteTask(task.id);
+                                                        }}
                                                         className="text-gray-400 hover:text-red-500 transition-colors"
                                                         title="Supprimer la tâche"
                                                     >
@@ -368,13 +495,22 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
                                             </div>
                                         </div>
                                     ) : (
-                                        <button 
-                                            onClick={() => setNewTaskColumn(column)}
-                                            className="w-full p-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
-                                        >
-                                            <Plus size={16} className="mr-2" />
-                                            Ajouter une carte
-                                        </button>
+                                        <div className="space-y-2">
+                                            <button 
+                                                onClick={() => setNewTaskColumn(column)}
+                                                className="w-full p-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center text-sm"
+                                            >
+                                                <Plus size={16} className="mr-2" />
+                                                Ajouter rapidement
+                                            </button>
+                                            <button 
+                                                onClick={() => openTaskModal(column)}
+                                                className="w-full p-3 bg-[#FF6300] text-white rounded-xl hover:bg-[#FFA325] transition-colors flex items-center justify-center text-sm"
+                                            >
+                                                <Plus size={16} className="mr-2" />
+                                                Ajouter avec détails
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -383,6 +519,206 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
                     )}
                 </div>
             </div>
+
+            {/* Modal pour créer une tâche détaillée */}
+            {isTaskModalOpen && (
+                <div className="fixed inset-0 z-60 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+                        <div className="p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-900">Nouvelle tâche</h3>
+                                <button 
+                                    onClick={() => setIsTaskModalOpen(false)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                {/* Titre */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Titre de la tâche *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={newTaskDetails.title}
+                                        onChange={(e) => setNewTaskDetails({...newTaskDetails, title: e.target.value})}
+                                        placeholder="Ex: Réserver l'hôtel"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6300] focus:border-transparent"
+                                        autoFocus
+                                    />
+                                </div>
+
+                                {/* Description */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Description (optionnel)
+                                    </label>
+                                    <textarea
+                                        value={newTaskDetails.description}
+                                        onChange={(e) => setNewTaskDetails({...newTaskDetails, description: e.target.value})}
+                                        placeholder="Détails de la tâche..."
+                                        rows={3}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6300] focus:border-transparent"
+                                    />
+                                </div>
+
+                                {/* Catégorie/Priorité */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Catégorie
+                                    </label>
+                                    <select
+                                        value={newTaskDetails.priority}
+                                        onChange={(e) => setNewTaskDetails({...newTaskDetails, priority: e.target.value})}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6300] focus:border-transparent"
+                                    >
+                                        {Object.keys(priorityColors).map((priority) => (
+                                            <option key={priority} value={priority}>
+                                                {priority}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Colonne de destination */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Statut
+                                    </label>
+                                    <div className="text-sm text-gray-600">
+                                        Sera ajoutée à la colonne : <span className="font-medium">{newTaskDetails.column}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Boutons */}
+                            <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
+                                <button 
+                                    onClick={() => setIsTaskModalOpen(false)}
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                >
+                                    Annuler
+                                </button>
+                                <button 
+                                    onClick={createDetailedTask}
+                                    disabled={!newTaskDetails.title.trim()}
+                                    className="px-6 py-2 bg-[#FF6300] text-white rounded-lg hover:bg-[#FFA325] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    Créer la tâche
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal pour éditer une tâche */}
+            {isEditModalOpen && editingTask && (
+                <div className="fixed inset-0 z-60 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+                        <div className="p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-900">Modifier la tâche</h3>
+                                <button 
+                                    onClick={closeEditModal}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                {/* Titre */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Titre de la tâche *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={editingTask.title}
+                                        onChange={(e) => setEditingTask({...editingTask, title: e.target.value})}
+                                        placeholder="Ex: Réserver l'hôtel"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6300] focus:border-transparent"
+                                    />
+                                </div>
+
+                                {/* Description */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Description
+                                    </label>
+                                    <textarea
+                                        value={editingTask.description}
+                                        onChange={(e) => setEditingTask({...editingTask, description: e.target.value})}
+                                        placeholder="Détails de la tâche..."
+                                        rows={3}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6300] focus:border-transparent"
+                                    />
+                                </div>
+
+                                {/* Catégorie/Priorité */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Catégorie
+                                    </label>
+                                    <select
+                                        value={editingTask.priority}
+                                        onChange={(e) => setEditingTask({...editingTask, priority: e.target.value})}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6300] focus:border-transparent"
+                                    >
+                                        {Object.keys(priorityColors).map((priority) => (
+                                            <option key={priority} value={priority}>
+                                                {priority}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Aperçu de la catégorie */}
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <span>Aperçu :</span>
+                                    <span className={`px-2 py-1 rounded-full text-xs text-white font-medium ${priorityColors[editingTask.priority] || 'bg-gray-400'}`}>
+                                        {editingTask.priority}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Boutons */}
+                            <div className="flex justify-between mt-6 pt-4 border-t">
+                                <button 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        deleteTask(editingTask.id);
+                                        closeEditModal();
+                                    }}
+                                    className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2"
+                                >
+                                    <X size={16} />
+                                    Supprimer
+                                </button>
+                                <div className="flex gap-3">
+                                    <button 
+                                        onClick={closeEditModal}
+                                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button 
+                                        onClick={saveTaskEdits}
+                                        disabled={!editingTask.title.trim()}
+                                        className="px-6 py-2 bg-[#FF6300] text-white rounded-lg hover:bg-[#FFA325] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        Sauvegarder
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
