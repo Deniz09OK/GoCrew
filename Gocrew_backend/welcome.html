@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenue sur GoCrew</title>
+</head>
+<body>
+  <div class="container">
+    <h1>Bienvenue sur GoCrew !</h1>
+    <p>Organisez vos voyages en équipe facilement.</p>
+    <a href="/Gocrew_backend/CreateCrew.html" class="btn">Créer une Crew</a>
+    <a href="/Gocrew_backend/CreateAnnouncement.html" class="btn" style="margin-left:1rem;">Créer une Annonce</a>
+  </div>
+  <div class="crews-list" id="crewsList">
+    <h2>Vos Crews</h2>
+    <div id="crewsLinks">Chargement...</div>
+  </div>
+  <div class="announcements-list" id="announcementsList">
+    <h2>Annonces Publiques</h2>
+    <div id="announcementsLinks">Chargement...</div>
+  </div>
+
+  <!-- Chat global -->
+  <div id="global-chat">
+    <h2>💬 Chat global</h2>
+    <div id="chat-messages"></div>
+    <form id="chat-form">
+      <input id="chat-input" type="text" placeholder="Votre message...">
+      <button type="submit">Envoyer</button>
+    </form>
+  </div>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script>
+    async function loadCrews() {
+      const res = await fetch('/api/crews');
+      const container = document.getElementById('crewsLinks');
+      if (!res.ok) {
+        container.textContent = "Erreur lors du chargement des crews.";
+        return;
+      }
+      const crews = await res.json();
+      if (!crews.length) {
+        container.textContent = "Aucune crew créée pour le moment.";
+        return;
+      }
+      const match = window.location.pathname.match(/\/crew\/(\d+)/);
+      const currentId = match ? match[1] : null;
+      container.innerHTML = crews.map(crew => `
+        <a href="/crew/${crew.id}" class="crew-link${currentId == crew.id ? ' active' : ''}">
+          ${crew.name} (${crew.destination || 'Destination inconnue'})
+        </a>
+      `).join('');
+    }
+
+    async function loadAnnouncements() {
+      const res = await fetch('/api/announcements');
+      const container = document.getElementById('announcementsLinks');
+      if (!res.ok) {
+        container.textContent = "Erreur lors du chargement des annonces.";
+        return;
+      }
+      const announcements = await res.json();
+      if (!announcements.length) {
+        container.textContent = "Aucune annonce publique pour le moment.";
+        return;
+      }
+      container.innerHTML = announcements.map(a => `
+        <a href="/announcement/${a.id}" class="announcement-link">
+          ${a.title} (${a.destination || 'Destination inconnue'})
+        </a>
+      `).join('');
+    }
+
+    // --- Chat global ---
+    const socket = io();
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    // Récupère le username depuis localStorage
+    const gocrewUsername = localStorage.getItem('gocrew_username') || 'Anonyme';
+
+    // Affiche un message dans le chat
+    function appendMessage(msg) {
+      const div = document.createElement('div');
+      div.textContent = `[${msg.time || new Date().toLocaleTimeString()}] ${msg.user || 'Anonyme'}: ${msg.text}`;
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Réception des messages
+    socket.on('chat-message', appendMessage);
+
+    // Historique (optionnel)
+    socket.on('chat-history', msgs => {
+      chatMessages.innerHTML = '';
+      msgs.forEach(appendMessage);
+    });
+
+    // Envoi d'un message
+    chatForm.onsubmit = e => {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+      socket.emit('chat-message', { text, user: gocrewUsername });
+      chatInput.value = '';
+    };
+
+    loadCrews();
+    loadAnnouncements();
+  </script>
+</body>
+</html>
