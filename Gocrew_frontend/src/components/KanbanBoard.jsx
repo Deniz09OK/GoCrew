@@ -385,7 +385,6 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
                                                         value={task.priority}
                                                         onChange={(e) => updateTaskPriority(task.id, e.target.value)}
                                                         onBlur={() => setEditingPriorityTaskId(null)}
-                                                        onClick={(e) => e.stopPropagation()}
                                                         className="px-2 py-1 rounded-full text-xs font-medium border focus:outline-none focus:ring-2 focus:ring-[#FF6300]"
                                                         autoFocus
                                                     >
@@ -609,111 +608,6 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
                                 >
                                     Créer la tâche
                                 </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Modal pour éditer une tâche */}
-            {isEditModalOpen && editingTask && (
-                <div className="fixed inset-0 z-60 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
-                        <div className="p-6">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-900">Modifier la tâche</h3>
-                                <button 
-                                    onClick={closeEditModal}
-                                    className="text-gray-400 hover:text-gray-600"
-                                >
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            <div className="space-y-4">
-                                {/* Titre */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Titre de la tâche *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={editingTask.title}
-                                        onChange={(e) => setEditingTask({...editingTask, title: e.target.value})}
-                                        placeholder="Ex: Réserver l'hôtel"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6300] focus:border-transparent"
-                                    />
-                                </div>
-
-                                {/* Description */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Description
-                                    </label>
-                                    <textarea
-                                        value={editingTask.description}
-                                        onChange={(e) => setEditingTask({...editingTask, description: e.target.value})}
-                                        placeholder="Détails de la tâche..."
-                                        rows={3}
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6300] focus:border-transparent"
-                                    />
-                                </div>
-
-                                {/* Catégorie/Priorité */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Catégorie
-                                    </label>
-                                    <select
-                                        value={editingTask.priority}
-                                        onChange={(e) => setEditingTask({...editingTask, priority: e.target.value})}
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6300] focus:border-transparent"
-                                    >
-                                        {Object.keys(priorityColors).map((priority) => (
-                                            <option key={priority} value={priority}>
-                                                {priority}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                {/* Aperçu de la catégorie */}
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <span>Aperçu :</span>
-                                    <span className={`px-2 py-1 rounded-full text-xs text-white font-medium ${priorityColors[editingTask.priority] || 'bg-gray-400'}`}>
-                                        {editingTask.priority}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Boutons */}
-                            <div className="flex justify-between mt-6 pt-4 border-t">
-                                <button 
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        deleteTask(editingTask.id);
-                                        closeEditModal();
-                                    }}
-                                    className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2"
-                                >
-                                    <X size={16} />
-                                    Supprimer
-                                </button>
-                                <div className="flex gap-3">
-                                    <button 
-                                        onClick={closeEditModal}
-                                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                                    >
-                                        Annuler
-                                    </button>
-                                    <button 
-                                        onClick={saveTaskEdits}
-                                        disabled={!editingTask.title.trim()}
-                                        className="px-6 py-2 bg-[#FF6300] text-white rounded-lg hover:bg-[#FFA325] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                        Sauvegarder
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
