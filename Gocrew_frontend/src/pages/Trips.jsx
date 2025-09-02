@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HomeIcon, Users, Calendar, MapPin, DollarSign } from 'lucide-react';
 import BreadcrumbHeader from '../components/BreadcrumbHeader';
-import SearchFilterBar from '../components/SearchFilterBar';
 import CreateTripModal from '../components/CreateTripModal';
 import StatsCard from '../components/StatsCard';
 import KanbanBoard from '../components/KanbanBoard';
@@ -149,31 +148,6 @@ export default function Trips() {
                 onButtonClick={() => setIsModalOpen(true)}
             />
             
-            {/* Barre recherche + filtres */}
-            <SearchFilterBar
-                filters={[
-                    { 
-                        label: 'Type', 
-                        options: [
-                            { value: 'all', label: 'Tous les crews' },
-                            { value: 'crews', label: 'Mes crews' }
-                        ]
-                    }
-                ]}
-                onFilterChange={(filters) => setFilter(filters.Type || 'all')}
-                onSearch={(searchTerm) => console.log('Recherche:', searchTerm)}
-            />
-
-            {/* Statistiques */}
-            <div className="flex justify-center mb-6 mt-3">
-                <StatsCard 
-                    icon={Users}
-                    title="Mes Crews"
-                    count={crews.length}
-                    className="w-80"
-                />
-            </div>
-
             {/* Contenu principal */}
             <main className="space-y-8">
                 {/* Section Crews */}

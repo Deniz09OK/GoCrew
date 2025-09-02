@@ -21,6 +21,9 @@ app.use('/api', routes);
 // Sert les fichiers statiques (HTML, JS, CSS, etc.)
 app.use(express.static(__dirname));
 
+// Servir les fichiers uploadés
+app.use('/uploads', express.static(__dirname + '/Gocrew_backend/uploads'));
+
 // Sert le formulaire principal à la racine
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/test.html');

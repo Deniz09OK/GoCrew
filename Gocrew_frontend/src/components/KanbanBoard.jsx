@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, MoreVertical, Calendar, Users, MapPin } from 'lucide-react';
+import TaskEditModal from './TaskEditModal';
 
 const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
     const [tasks, setTasks] = useState([]);
@@ -14,7 +15,6 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
         column: ''
     });
     const [editingPriorityTaskId, setEditingPriorityTaskId] = useState(null);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
 
     // Charger les tâches depuis l'API
@@ -276,36 +276,35 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
 
     // Ouvrir le modal d'édition
     const openEditModal = (task) => {
-        setEditingTask({
-            id: task.id,
-            title: task.title,
-            description: task.description || '',
-            priority: task.priority,
-            status: task.status
-        });
-        setIsEditModalOpen(true);
+        setEditingTask(task);
     };
 
     // Sauvegarder les modifications d'une tâche
-    const saveTaskEdits = async () => {
-        if (editingTask && editingTask.title.trim()) {
+    const saveTaskEdits = async (updatedTaskData) => {
+        if (updatedTaskData && updatedTaskData.title.trim()) {
             try {
-                await updateTask(editingTask.id, {
-                    title: editingTask.title,
-                    description: editingTask.description,
-                    priority: editingTask.priority
+                const response = await updateTask(editingTask.id, {
+                    title: updatedTaskData.title,
+                    description: updatedTaskData.description,
+                    priority: updatedTaskData.priority,
+                    status: updatedTaskData.status
                 });
-                setIsEditModalOpen(false);
-                setEditingTask(null);
+                
+                if (response) {
+                    console.log('Tâche sauvegardée avec succès');
+                    setEditingTask(null);
+                } else {
+                    throw new Error('Erreur lors de la sauvegarde');
+                }
             } catch (error) {
                 console.error('Erreur lors de la sauvegarde:', error);
+                alert('Erreur lors de la sauvegarde de la tâche');
             }
         }
     };
 
     // Fermer le modal d'édition
     const closeEditModal = () => {
-        setIsEditModalOpen(false);
         setEditingTask(null);
     };
 
@@ -430,17 +429,26 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
 
                                             {/* Task Footer */}
                                             <div className="flex items-center justify-between">
-                                                <div className="flex items-center">
-                                                    <div className="w-6 h-6 bg-orange-400 rounded-full mr-2 flex items-center justify-center">
-                                                        <span className="text-xs text-white font-medium">
-                                                            {task.first_name ? task.first_name.charAt(0) : 'U'}
+                                                {(task.username || task.assignee) && (
+                                                    <div className="flex items-center">
+                                                        <div className="w-6 h-6 bg-orange-400 rounded-full mr-2 flex items-center justify-center">
+                                                            <span className="text-xs text-white font-medium">
+                                                                {(task.username || task.assignee).charAt(0).toUpperCase()}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-xs text-gray-500">
+                                                            {task.username || task.assignee}
                                                         </span>
                                                     </div>
-                                                    <span className="text-xs text-gray-500">
-                                                        {task.first_name ? `${task.first_name} ${task.last_name}` : task.assignee || 'Non assigné'}
-                                                    </span>
-                                                </div>
+                                                )}
                                                 <div className="flex items-center space-x-2">
+                                                    {/* Indicateur de documents */}
+                                                    {task.document_count > 0 && (
+                                                        <div className="flex items-center text-gray-400 text-xs">
+                                                            <span className="mr-1">📎</span>
+                                                            <span>{task.document_count}</span>
+                                                        </div>
+                                                    )}
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
@@ -613,6 +621,15 @@ const KanbanBoard = ({ isOpen, onClose, crew, announcement, type }) => {
                     </div>
                 </div>
             )}
+
+            {/* Nouveau Modal d'édition avancé */}
+            <TaskEditModal
+                isOpen={!!editingTask}
+                onClose={closeEditModal}
+                task={editingTask}
+                onSave={saveTaskEdits}
+                onDelete={deleteTask}
+            />
         </div>
     );
 };

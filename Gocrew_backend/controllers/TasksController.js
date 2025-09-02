@@ -5,7 +5,8 @@ exports.getTasksByCrewId = async (req, res) => {
     const { crewId } = req.params;
     try {
         const { rows } = await pool.query(
-            `SELECT t.*, u.username, u.email 
+            `SELECT t.*, u.username, u.email,
+             (SELECT COUNT(*) FROM documents d WHERE d.task_id = t.id) as document_count
              FROM tasks t 
              LEFT JOIN users u ON t.assigned_to = u.id 
              WHERE t.crew_id = $1 

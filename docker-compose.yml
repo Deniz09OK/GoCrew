@@ -19,6 +19,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - ./Gocrew_backend/uploads:/app/Gocrew_backend/uploads
     networks:
       - gocrew_network
 

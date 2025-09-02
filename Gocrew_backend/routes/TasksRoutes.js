@@ -10,8 +10,5 @@ router.put('/:id', controller.updateTask);
 router.delete('/:id', controller.deleteTask);
 router.post('/reorder', controller.reorderTasks);
 router.post('/:id/like', controller.toggleLike);
-const controller = require('../controllers/TasksController');
-router.get('/', controller.getAllTasks);
-router.post('/', controller.createTask);
 
 module.exports = router;

@@ -3,7 +3,7 @@ import Person from "../components/icons/Person";
 
 export default function CardAnnouncement({ annonce }) {
     return (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col">
+        <div className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col cursor-pointer hover:shadow-lg transition-shadow">
             <div className="bg-orange-400 h-28 py-4 md:px-32 flex items-center justify-center text-white font-bold">
                 <img
                     src="/images/Ticket.png"
@@ -25,13 +25,25 @@ export default function CardAnnouncement({ annonce }) {
                 <p className="text-xs font-normal text-neutral-700flex-1">
                     {annonce.description}
                 </p>
-                <div className="mt-2 text-xs md:flex flex items-center justify-between">
-                    <p className="text-gray-900">
-                        <span className="text-[#FF6300] font-semibold ">Lieu:</span> {annonce.lieu}
-                    </p>
-                    <p className="text-gray-900">
-                        <span className="text-[#FF6300] font-semibold ">Budget personnel:</span> {annonce.budget}
-                    </p>
+                <div className="mt-2 text-xs space-y-1">
+                    <div className="md:flex flex items-center justify-between">
+                        <p className="text-gray-900">
+                            <span className="text-[#FF6300] font-semibold">Lieu:</span> {annonce.lieu}
+                        </p>
+                        <p className="text-gray-900">
+                            <span className="text-[#FF6300] font-semibold">Budget:</span> {annonce.budget}
+                        </p>
+                    </div>
+                    {annonce.crew_name && (
+                        <p className="text-gray-900">
+                            <span className="text-[#FF6300] font-semibold">Équipe:</span> {annonce.crew_name}
+                        </p>
+                    )}
+                    {annonce.owner && (
+                        <p className="text-gray-900">
+                            <span className="text-[#FF6300] font-semibold">Organisateur:</span> {annonce.owner}
+                        </p>
+                    )}
                 </div>
             </div>
         </div>
