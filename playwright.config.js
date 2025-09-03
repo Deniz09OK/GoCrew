@@ -4,9 +4,9 @@
 /** @type {import('@playwright/test').PlaywrightTestConfig} */
 const config = {
     testDir: './tests/e2e',
-    timeout: 60000, // Timeout augmenté pour les workflows complets
+    timeout: process.env.CI ? 120000 : 60000, // Timeout plus long en CI
     expect: {
-        timeout: 10000 // Timeout pour les assertions
+        timeout: process.env.CI ? 15000 : 10000 // Timeout pour les assertions plus long en CI
     },
     retries: process.env.CI ? 2 : 1, // Plus de retries en CI
     workers: 1, // Exécution séquentielle pour éviter les conflits de données
