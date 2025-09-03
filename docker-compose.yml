@@ -13,7 +13,7 @@ services:
       - DB_PORT=5432
       - DB_NAME=gocrew
       - DB_USER=postgres
-      - DB_PASSWORD=admin
+      - DB_PASSWORD=annecha
     volumes:
       - .:/app
       - /app/node_modules
