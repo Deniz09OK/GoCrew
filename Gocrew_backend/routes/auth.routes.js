@@ -6,12 +6,13 @@ const { Pool } = require('pg');
 
 require('dotenv').config();
 
+	
 // Récupère la chaîne de connexion à la base de données depuis .env
 const connectionString = process.env.DATABASE_URL;
 console.log('DATABASE_URL chargée :', connectionString);
-
 // Initialise le pool de connexions PostgreSQL
 const pool = new Pool({ connectionString });
+
 
 // Route de connexion utilisateur (login)
 router.post('/login', async (req, res) => {
@@ -33,12 +34,11 @@ router.post('/login', async (req, res) => {
         if (!valid)
             return res.status(401).json({ error: 'Mot de passe incorrect.' });
 
-        // Génère un token JWT valable 2 minute
+        // Génère un token JWT valable 24 heures
         const token = jwt.sign(
             { id: user.id, email: user.email, username: user.username },
             process.env.JWT_SECRET,
-            
-            { expiresIn: '2m' }
+            { expiresIn: '24h' }
         );
         res.json({ token, user: { id: user.id, email: user.email, username: user.username } });
     } catch (err) {
@@ -95,10 +95,8 @@ router.get('/user-by-email', async (req, res) => {
 router.get('/me', async (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ error: "Token manquant." });
-
     const token = authHeader.split(' ')[1];
     if (!token) return res.status(401).json({ error: "Token manquant." });
-
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         // Recherche l'utilisateur en base
@@ -113,5 +111,5 @@ router.get('/me', async (req, res) => {
         return res.status(401).json({ error: "Token invalide ou expiré." });
     }
 });
-
+    
 module.exports = router;

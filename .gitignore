@@ -58,5 +58,8 @@ typings/
 # dotenv environment variables file
 .env
 
+# Configuration files with sensitive data
+Gocrew_backend/config/
+
 # next.js build output
 .next

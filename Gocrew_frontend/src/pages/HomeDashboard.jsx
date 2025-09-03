@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ArrowRight from "../components/icons/ArrowRight";
+import PlanTripModal from "../components/PlanTripModal";
 
 export default function HomeDashboard() {
+  const [showPlanModal, setShowPlanModal] = useState(false);
   return (
-  <div className="flex flex-col items-center justify-center">
+   <div className="flex flex-col items-center justify-center">
   {/* Bloc principal */}
   <div className="bg-white border border-gray-300 text-start rounded-3xl shadow-md py-8 md:py-12 px-4 md:px-16 flex flex-col md:flex-row items-center justify-between w-full">
     
@@ -15,7 +18,10 @@ export default function HomeDashboard() {
       <p className="text-black text-base sm:text-lg md:text-lg font-semibold mt-4 mb-8 md:mb-12">
         Fini les tableaux Excel et les messages à rallonge : GoCrew vous aide à tout centraliser. Invitez vos amis, échangez des idées, votez pour les meilleures options et partez serein.
       </p>
-      <button className="bg-[#FF6300] text-white text-sm sm:text-base px-6 sm:px-8 py-3 rounded-2xl font-bold hover:bg-[#FFA325] transition flex items-center gap-2">
+      <button 
+        onClick={() => setShowPlanModal(true)}
+        className="bg-[#FF6300] text-white text-sm sm:text-base px-6 sm:px-8 py-3 rounded-2xl font-bold hover:bg-[#FFA325] transition flex items-center gap-2"
+      >
         Planifier mon voyage
         <ArrowRight />
       </button>
@@ -39,6 +45,12 @@ export default function HomeDashboard() {
       className="max-h-36 sm:max-h-44 md:max-h-56"
     />
   </div>
+
+  {/* Modal de planification */}
+  <PlanTripModal
+    isOpen={showPlanModal}
+    onClose={() => setShowPlanModal(false)}
+  />
 </div>
 
   );

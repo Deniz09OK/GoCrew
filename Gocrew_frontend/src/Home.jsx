@@ -1,14 +1,18 @@
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CardAnnouncement from "./components/CardAnnouncement";
 import CardFeature from "./components/CardFeatures";
 import Heading from "./components/Heading";
 import SearchFilterBar from "./components/SearchFilterBar";
+import PlanTripModal from "./components/PlanTripModal";
 import { ArrowRight } from "lucide-react";
 
 export default function Home() {
+    const navigate = useNavigate();
+    const [showPlanModal, setShowPlanModal] = useState(false);
 
     const annonces = [
         { id: 1, date: "18/03/2025", title: "Aventure au Japon", description: "Deux semaines au Japon...", lieu: "Japon", budget: "1200€", participants: 6 },
@@ -45,8 +49,16 @@ export default function Home() {
                             GoCrew vous libère de l’organisation. Découvrez une solution moderne et intuitive pour planifier vos séjours.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                            <button className="bg-[#FF6300] text-white px-8 py-3 rounded-2xl text-base font-bold shadow">Planifier mon voyage</button>
-                            <button className="border border-white text-white px-8 py-3 rounded-2xl text-base font-bold hover:bg-white hover:text-[#FF6300] transition">
+                            <button 
+                                onClick={() => setShowPlanModal(true)}
+                                className="bg-[#FF6300] text-white px-8 py-3 rounded-2xl text-base font-bold shadow"
+                            >
+                                Planifier mon voyage
+                            </button>
+                            <button 
+                                onClick={() => navigate('/announcements')}
+                                className="border border-white text-white px-8 py-3 rounded-2xl text-base font-bold hover:bg-white hover:text-[#FF6300] transition"
+                            >
                                 Voir les annonces
                             </button>
                         </div>
@@ -81,7 +93,10 @@ export default function Home() {
                         <p className="font-normal text-xl text-start">GoCrew centralise tout ce dont vous avez besoin pour organiser votre voyage : hébergements, transports, activités, budget, documents importants…
                             Fini les allers-retours entre applis, e-mails et fichiers dispersés. Avec GoCrew, tout est réuni dans une seule plateforme intuitive, élégante et conçue pour vous faire gagner du temps.</p>
                         <div className="flex items-center justify-start mt-5">
-                            <button className="flex items-center bg-[#FF6300] text-white px-6 py-3 mr-3 rounded-full">
+                            <button 
+                                onClick={() => navigate('/announcements')}
+                                className="flex items-center bg-[#FF6300] text-white px-6 py-3 mr-3 rounded-full"
+                            >
                                 Commencer maintenant <ArrowRight />
                             </button>
                         </div>
@@ -102,7 +117,10 @@ export default function Home() {
                     ))}
                 </div>
                 <div className="flex items-center justify-center gap-20 mt-24">
-                    <button className="flex items-center bg-[#FF6300] text-white px-6 py-3 mr-3 rounded-full">
+                    <button 
+                        onClick={() => setShowPlanModal(true)}
+                        className="flex items-center bg-[#FF6300] text-white px-6 py-3 mr-3 rounded-full"
+                    >
                         Commencer maintenant <ArrowRight />
                     </button>
                 </div>
@@ -138,6 +156,12 @@ export default function Home() {
 
             {/* Footer */}
             <Footer />
+
+            {/* Modal de planification */}
+            <PlanTripModal
+                isOpen={showPlanModal}
+                onClose={() => setShowPlanModal(false)}
+            />
         </div>
     );
 }

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kanban Crew</title>
+</head>
+<body>
+  <h1>Kanban du Crew</h1>
+  <div class="kanban-board" id="kanbanBoard"></div>
+
+  <!-- Bouton pour afficher les fichiers du crew -->
+  <button id="showCrewFilesBtn" style="margin:1rem 0;">Afficher les fichiers du crew</button>
+  <div id="crewFilesList" style="margin-bottom:2rem;"></div>
+
+  <!-- Chat du crew -->
+  <div id="crew-chat">
+    <h2>💬 Chat du crew</h2>
+    <div id="crew-chat-messages"></div>
+    <form id="crew-chat-form" autocomplete="off">
+      <input id="crew-chat-input" type="text" placeholder="Votre message..." autocomplete="off">
+      <button type="submit">Envoyer</button>
+    </form>
+  </div>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script>
+    // --- Kanban logic ---
+    function getCrewId() {
+      const match = window.location.pathname.match(/\/crew\/(\d+)/);
+      return match ? match[1] : null;
+    }
+    const crew_id = getCrewId();
+    let lists = ['todo', 'doing', 'done'];
+
+    async function fetchTasks() {
+      const res = await fetch(`/api/tasks?crew_id=${crew_id}`);
+      if (!res.ok) return [];
+      return await res.json();
+    }
+
+    function getAllLists(tasks) {
+      const set = new Set(lists);
+      tasks.forEach(t => set.add(t.status));
+      return Array.from(set);
+    }
+
+    let draggedTaskId = null;
+    function dragStart(e) {
+      draggedTaskId = this.dataset.id;
+      setTimeout(() => this.style.display = "none", 0);
+    }
+    function dragEnd(e) {
+      this.style.display = "";
+      draggedTaskId = null;
+    }
+
+    // Extensions autorisées pour l'upload
+    const allowedExtensions = [
+      '.pdf', '.gif', '.jpg', '.jpeg', '.jfif', '.pjpeg', '.pjp', '.png', '.svg',
+      '.docx', '.xlsx', '.pptx'
+    ];
+
+    // Remplace la fonction editTaskPrompt pour utiliser prompt() natif (comme sur la 2ème image)
+    function editTaskPrompt(task) {
+      const title = prompt('Titre de la tâche', task.title);
+      if (title === null) return;
+      const description = prompt('Description', task.description || '');
+      if (description === null) return;
+      fetch(`/api/tasks/${task.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description })
+      }).then(() => loadKanban());
+    }
+
+    function renderKanban(tasks) {
+      lists = getAllLists(tasks);
+      const board = document.getElementById('kanbanBoard');
+      board.innerHTML = '';
+      lists.forEach(list => {
+        const col = document.createElement('div');
+        col.className = 'kanban-column';
+        col.id = list;
+
+        // Titre de la liste
+        const titleDiv = document.createElement('div');
+        titleDiv.style.position = 'relative';
+        titleDiv.innerHTML = `<h2>${list}</h2>`;
+        col.appendChild(titleDiv);
+
+        // Liste des tâches
+        const tasksDiv = document.createElement('div');
+        tasksDiv.className = 'tasks';
+        tasks.filter(t => t.status === list).forEach(task => {
+          const div = document.createElement('div');
+          div.className = 'task';
+          div.draggable = true;
+          div.dataset.id = task.id;
+          div.innerHTML = `
+            <strong>${task.title}</strong><br>${task.description || ''}
+            <button class="edit-task" title="Modifier">✏️</button>
+            <button class="delete-task" title="Supprimer">🗑️</button>
+            <form class="upload-form" style="margin-top:5px;">
+              <input type="file" name="file" style="width:70%;">
+            </form>
+          `;
+          // Drag events
+          div.addEventListener('dragstart', dragStart);
+          div.addEventListener('dragend', dragEnd);
+          // Delete task
+          div.querySelector('.delete-task').onclick = async function(e) {
+            e.stopPropagation();
+            await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
+            loadKanban();
+          };
+          // Edit task
+          div.querySelector('.edit-task').onclick = function(e) {
+            e.stopPropagation();
+            editTaskPrompt(task);
+          };
+          // Upload document/image lié au crew
+          div.querySelector('.upload-form').onsubmit = async function(e) {
+            e.preventDefault();
+            const fileInput = this.file;
+            if (!fileInput.files.length) return;
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            // Ajoute l'id du crew pour le backend (même logique que pour les annonces)
+            formData.append('crewId', crew_id);
+            const res = await fetch('/api/documents/upload', {
+              method: 'POST',
+              body: formData
+            });
+            if (res.ok) {
+              alert('Fichier envoyé !');
+            } else {
+              const err = await res.json();
+              alert('Erreur: ' + (err.error || 'upload'));
+            }
+            fileInput.value = '';
+          };
+          tasksDiv.appendChild(div);
+        });
+        col.appendChild(tasksDiv);
+
+        // Formulaire d'ajout de tâche
+        const form = document.createElement('form');
+        form.className = 'add-task-form';
+        form.dataset.status = list;
+        form.innerHTML = `
+          <input type="text" name="title" placeholder="Titre" required>
+          <textarea name="description" placeholder="Description"></textarea>
+          <button type="submit">Ajouter</button>
+        `;
+        form.onsubmit = async function(e) {
+          e.preventDefault();
+          const title = form.title.value;
+          const description = form.description.value;
+          await fetch('/api/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ crew_id, title, description, status: list })
+          });
+          form.reset();
+          loadKanban();
+        };
+        col.appendChild(form);
+
+        board.appendChild(col);
+      });
+
+      // Drag & drop listeners sur les colonnes (toujours après render)
+      document.querySelectorAll('.kanban-column .tasks').forEach(col => {
+        col.ondragover = function(e) {
+          e.preventDefault();
+          this.classList.add('drag-over');
+        };
+        col.ondragleave = function(e) {
+          this.classList.remove('drag-over');
+        };
+        col.ondrop = async function(e) {
+          e.preventDefault();
+          this.classList.remove('drag-over');
+          if (!draggedTaskId) return;
+          const parentCol = this.closest('.kanban-column');
+          const newStatus = parentCol.id;
+          // Met à jour le statut côté backend
+          await fetch(`/api/tasks/${draggedTaskId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+          });
+          loadKanban();
+        };
+      });
+    }
+
+    async function loadKanban() {
+      if (!crew_id) return;
+      const tasks = await fetchTasks();
+      renderKanban(tasks);
+    }
+
+    loadKanban();
+
+    // --- Chat du crew ---
+    const socket = io();
+    const chatMessages = document.getElementById('crew-chat-messages');
+    const chatForm = document.getElementById('crew-chat-form');
+    const chatInput = document.getElementById('crew-chat-input');
+    const gocrewUsername = localStorage.getItem('gocrew_username') || 'Anonyme';
+
+    // Rejoint le salon du crew (attendre que le socket soit bien connecté)
+    socket.on('connect', () => {
+      socket.emit('join-crew-chat', { crewId: crew_id });
+    });
+
+    // Affiche un message dans le chat
+    function appendCrewMessage(msg) {
+      const div = document.createElement('div');
+      div.textContent = `[${msg.time || new Date().toLocaleTimeString()}] ${msg.user || 'Anonyme'}: ${msg.text}`;
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Historique du chat
+    socket.on('chat-history', msgs => {
+      chatMessages.innerHTML = '';
+      msgs.forEach(appendCrewMessage);
+    });
+
+    // Réception des messages
+    socket.on('chat-message', appendCrewMessage);
+
+    // Envoi d'un message
+    chatForm.onsubmit = e => {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+      socket.emit('chat-message-crew', { crewId: crew_id, text, user: gocrewUsername });
+      chatInput.value = '';
+    };
+
+    // Affichage des fichiers du crew
+    document.getElementById('showCrewFilesBtn').onclick = async function() {
+      const listDiv = document.getElementById('crewFilesList');
+      listDiv.textContent = 'Chargement...';
+      const res = await fetch(`/api/documents/list-crew/${crew_id}`);
+      if (!res.ok) {
+        listDiv.textContent = 'Erreur lors du chargement des fichiers.';
+        return;
+      }
+      const files = await res.json();
+      if (!files.length) {
+        listDiv.textContent = 'Aucun fichier pour ce crew.';
+        return;
+      }
+      listDiv.innerHTML = files.map(f =>
+        `<a href="${f.url}" target="_blank" style="display:block;margin-bottom:5px;">${f.filename}</a>`
+      ).join('');
+    };
+  </script>
+</body>
+</html>

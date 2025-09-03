@@ -38,13 +38,8 @@ export default function AppLayout() {
             .then(res => res.ok ? res.json() : null)
             .then(data => setUser(data))
             .catch(() => setUser(null));
-    }, []);
+    }, []);         
 
-    const voyages = [
-        { id: 'barcelone', name: 'Voyage barcelone', color: 'bg-blue-400' },
-        { id: 'espagne', name: 'Voyage Espagne', color: 'bg-red-400' },
-        { id: 'italie', name: 'Voyage Italie', color: 'bg-green-400' },
-    ];
     // Simuler un utilisateur connecté (à remplacer par vos données utilisateur réelles)
     // const user = {
     //     name: "Anne-cha"
@@ -133,27 +128,7 @@ export default function AppLayout() {
                                 <AirPlane />
                                 {isSidebarOpen && <span className="ml-4">Voyages</span>}
                             </NavLink>
-                            {isSidebarOpen && <Link to="/trips" className="p-1.5 bg-white text-primary rounded-full flex items-center justify-center hover:bg-gray-200 ring-2 ring-secondary">
-                                <span className="text-2xl"><Add /></span>
-                            </Link>}
                         </div>
-                        {isSidebarOpen && <div className="mt-2 ml-8 pl-3 space-y-2 flex flex-col">
-                            {voyages.map(voyage => (
-                                <div key={voyage.id} className="flex items-center justify-between">
-                                    <NavLink
-                                        to={`/trips/${voyage.id}`}
-                                        className={({ isActive }) =>
-                                            `flex items-center py-1 text-white hover:text-gray-200 ${isActive ? "font-bold" : ""
-                                            }`
-                                        }
-                                    >
-                                        <span className={`w-2 h-2 rounded-full mr-3 ${voyage.color}`}></span>
-                                        {voyage.name}
-                                    </NavLink>
-                                    <EllipsisVerticalIcon className="text-white cursor-pointer" />
-                                </div>
-                            ))}
-                        </div>}
 
                     </div>
                 </nav>

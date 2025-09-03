@@ -1,23 +1,103 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Close from "../components/icons/Close";
 import BreadcrumbHeader from "../components/BreadcrumbHeader";
-import SearchFilterBar from "../components/SearchFilterBar";
 import CardAnnouncement from "../components/CardAnnouncement";
+import CreateAnnouncementModal from "../components/CreateAnnouncementModal";
+import KanbanBoard from "../components/KanbanBoard";
+import { Plus } from "lucide-react";
 
 export default function Announcements() {
+    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
+    const [annonces, setAnnonces] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+    const [isKanbanOpen, setIsKanbanOpen] = useState(false);
 
-    // Data mock
-    const annonces = [
-        { id: 1, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-        { id: 2, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-        { id: 3, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-        { id: 4, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-        { id: 5, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-        { id: 6, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-        { id: 7, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-        { id: 8, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
-    ]
+    // Charger les annonces depuis l'API
+    useEffect(() => {
+        fetchAnnouncements();
+    }, []);
+
+    const fetchAnnouncements = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:3000/api/announcements', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Données reçues de l\'API:', data); // Pour debug
+                
+                // Transformer les données pour correspondre au format attendu par CardAnnouncement
+                const formattedData = data.map(announcement => ({
+                    id: announcement.id,
+                    title: announcement.title,
+                    description: announcement.description,
+                    date: announcement.crew?.start_date || announcement.posted_at,
+                    lieu: announcement.crew?.destination || 'Destination non spécifiée',
+                    budget: announcement.crew?.budget ? `${announcement.crew.budget}€` : 'Budget non défini',
+                    participants: announcement.crew?.participants_count || 0,
+                    crew_id: announcement.crew?.id,
+                    crew_name: announcement.crew?.name,
+                    owner: announcement.crew?.owner?.username,
+                    posted_at: announcement.posted_at,
+                    start_date: announcement.crew?.start_date,
+                    end_date: announcement.crew?.end_date,
+                    max_participants: announcement.crew?.max_participants,
+                    destination: announcement.crew?.destination
+                }));
+                
+                setAnnonces(formattedData);
+            } else {
+                console.error('Erreur lors du chargement des annonces');
+                // Fallback vers les données mockées en cas d'erreur
+                setAnnonces([
+                    { id: 1, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
+                    { id: 2, title: "Road Trip Europe", description: "Découverte de l'Europe en van aménagé. Italie, Espagne, Portugal...", date: "15/06/2025", lieu: "Europe", budget: "800€", participants: 4 }
+                ]);
+            }
+        } catch (error) {
+            console.error('Erreur réseau:', error);
+            // Fallback vers les données mockées
+            setAnnonces([
+                { id: 1, title: "Aventure au Japon", description: "Deux semaines de voyage au Japon entre tradition et modernité. Tokyo, Kyoto, sanctuaires anciens...", date: "18/03/2025", lieu: "Japon", budget: "1200€", participants: 6 },
+                { id: 2, title: "Road Trip Europe", description: "Découverte de l'Europe en van aménagé. Italie, Espagne, Portugal...", date: "15/06/2025", lieu: "Europe", budget: "800€", participants: 4 }
+            ]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCreateAnnouncement = async (announcementData) => {
+        await fetchAnnouncements();
+    };
+
+    const handleAnnouncementClick = (annonce) => {
+        // Créer un objet crew à partir des données de l'annonce
+        const crewData = {
+            id: annonce.crew_id,
+            name: annonce.title,
+            description: annonce.description,
+            destination: annonce.lieu || annonce.destination,
+            start_date: annonce.start_date || annonce.date,
+            end_date: annonce.end_date,
+            budget: annonce.budget
+        };
+        
+        setSelectedAnnouncement(crewData);
+        setIsKanbanOpen(true);
+    };
+
+    const handleKanbanClose = () => {
+        setIsKanbanOpen(false);
+        setSelectedAnnouncement(null);
+    };
     return (
         <div className="bg-white rounded-3xl border-1 border-gray-300 p-6">
 
@@ -27,115 +107,42 @@ export default function Announcements() {
                 buttonText="+ Nouveau"
                 onButtonClick={() => setIsOpen(true)}
             />
-            {/* Barre recherche + filtres */}
-            <SearchFilterBar
-                filters={[
-                    { label: 'Catégorie', options: [{ value: 'all', label: 'Tout' }] },
-                    { label: 'Statut', options: [{ value: 'all', label: 'Tout' }] },
-                ]}
-                onSearch={() => console.log('Recherche')}
-            />
-
             {/* Grille des annonces */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mt-10">
-                {annonces.map((annonce) => (
-                    <CardAnnouncement key={annonce.id} annonce={annonce} />
-                ))}
-            </div>
-
-            {/* Modal ajout annonce */}
-            {isOpen && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl w-full max-w-lg shadow-lg">
-                        <div className="bg-[#FF6300] py-4 px-3 flex items-center justify-between rounded-t-xl">
-                            <h2 className="text-2xl font-semibold text-[#F5F6EC]">Ajouter une annonce</h2>
-                            <button
-                                onClick={() => setIsOpen(false)}
-                                className="bg-white p-1 rounded-full text-2xl font-bold"
-                            >
-                                <Close />
-                            </button>
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mt-10">
+                    {annonces.length > 0 ? (
+                        annonces.map((annonce) => (
+                            <div key={annonce.id} onClick={() => handleAnnouncementClick(annonce)} className="cursor-pointer">
+                                <CardAnnouncement annonce={annonce} />
+                            </div>
+                        ))
+                    ) : (
+                        <div className="col-span-full text-center py-12">
+                            <p className="text-gray-500">Aucune annonce trouvée</p>
                         </div>
-                        <div className="p-8 text-start">
-                            <form className="space-y-4">
-                                <div className="mb-4">
-                                    <label className="mb-2 text-base font-semibold text-gray-700" htmlFor="title">Nom du voyage</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Tokyo Drift"
-                                        className="w-full border border-gray-300 bg-[#F3F4F6] rounded-lg px-4 py-2 text-sm"
-                                    />
-                                </div>
-                                <div className="flex items-center justify-between gap-4 mb-4">
-                                    <div className="w-1/2">
-                                        <label className="mb-2 text-base font-semibold text-gray-700" htmlFor="membres">Membres</label>
-                                        <input
-                                            type="number"
-                                            placeholder="6"
-                                            className="w-full border border-gray-300 bg-[#F3F4F6] rounded-lg px-4 py-2 text-sm"
-                                        />
-                                    </div>
-                                    <div className="w-1/2">
-                                        <label className="mb-2 text-base font-semibold text-gray-700" htmlFor="budget">Budget par personne</label>
-                                        <input
-                                            type="number"
-                                            placeholder="600€"
-                                            className="w-full border border-gray-300 bg-[#F3F4F6] rounded-lg px-4 py-2 text-sm"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center justify-between gap-4 mb-4">
-                                    <div className="w-1/2">
-                                        <label className="mb-2 text-base font-semibold text-gray-700" htmlFor="date">Date du voyage</label>
-                                        <input
-                                            type="date"
-                                            placeholder="19/08/2025"
-                                            className="w-full border border-gray-300 bg-[#F3F4F6] rounded-lg px-4 py-2 text-sm"
-                                        />
-                                    </div>
-                                    <div className="w-1/2">
-                                        <label className="mb-2 text-base font-semibold text-gray-700" htmlFor="lieu">Lieu</label>
-                                        <select
-                                            className="w-full border border-gray-300 bg-[#F3F4F6] rounded-lg px-4 py-2 text-sm"
-                                        >
-                                            <option value="tokyo">Tokyo</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-
-                                <div className="mb-4">
-                                    <label className="mb-2 text-base font-semibold text-gray-700" htmlFor="description">Description du voyage</label>
-                                    <div className="bg-[#F3F4F6] p-4 rounded-xl">
-                                        <h4 className="mb-2 text-base font-medium text-gray-700" >Description <span className="font-normal"> (120 caractères max)</span></h4>
-
-                                        <textarea
-                                            className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm"
-                                            rows={4}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex justify-end gap-2 mt-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsOpen(false)}
-                                        className="text-base font-semibold px-4 py-2 rounded-lg border  bg-gray-400 text-white"
-                                    >
-                                        Annuler
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="text-base font-semibold px-4 py-2 rounded-lg bg-[#FF6300] text-white"
-                                    >
-                                        Publier
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                    )}
                 </div>
             )}
+
+            {/* Modal de création d'annonces */}
+            <CreateAnnouncementModal
+                isOpen={isOpen}
+                onClose={() => setIsOpen(false)}
+                onSubmit={handleCreateAnnouncement}
+            />
+
+            {/* Kanban Board Modal */}
+            <KanbanBoard
+                isOpen={isKanbanOpen}
+                onClose={handleKanbanClose}
+                crew={selectedAnnouncement}
+                type="announcement"
+            />
         </div>
     );
 }
+

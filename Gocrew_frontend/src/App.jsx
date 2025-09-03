@@ -10,7 +10,7 @@ import Trips from './pages/Trips.jsx';
 import HomeDashboard from './pages/HomeDashboard.jsx';
 import Home from './Home.jsx'
 import AppLayout from './components/AppLayout.jsx';
-import LandingPage from './LandingPage.jsx'; // 
+import LandingPage from './LandingPage.jsx';
 import UserPage from "./pages/Userpage.jsx";
 
 function App() {
