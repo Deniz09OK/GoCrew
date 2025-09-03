@@ -1,0 +1,354 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\deniz\\Epitech\\Projet\\GoCrew-project\\playwright.config.js",
+    "rootDir": "C:/Users/deniz/Epitech/Projet/GoCrew-project/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "playwright-report"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results.json"
+        }
+      ],
+      [
+        "list",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/Users/deniz/Epitech/Projet/GoCrew-project/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/deniz/Epitech/Projet/GoCrew-project/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.55.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "complete-workflow-perfect.spec.js",
+      "file": "complete-workflow-perfect.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "GoCrew - Workflow Utilisateur Parfait",
+          "file": "complete-workflow-perfect.spec.js",
+          "line": 13,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Workflow complet utilisateur - De l'inscription au management de tâches",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 50125,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🧪 Données de test générées: {\n  email: \u001b[32m'testuser1756894639606_2408@example.com'\u001b[39m,\n  username: \u001b[32m'TestUser1756894639606_2408'\u001b[39m,\n  password: \u001b[32m'TestPassword123!'\u001b[39m,\n  tripName: \u001b[32m'Voyage Test 1756894639606_2408'\u001b[39m,\n  announcementTitle: \u001b[32m'Annonce Test 1756894639606_2408'\u001b[39m,\n  taskTitle: \u001b[32m'Tâche Test 1756894639606_2408'\u001b[39m\n}\n"
+                        },
+                        {
+                          "text": "🚀 Début du workflow complet utilisateur\n"
+                        },
+                        {
+                          "text": "📝 Étape 1: Inscription\n"
+                        },
+                        {
+                          "text": "✅ Inscription terminée\n"
+                        },
+                        {
+                          "text": "🔐 Étape 2: Connexion\n"
+                        },
+                        {
+                          "text": "✅ Connexion réussie\n"
+                        },
+                        {
+                          "text": "👤 Étape 3: Clic sur le bouton Profil\n"
+                        },
+                        {
+                          "text": "✅ Navigation vers profil effectuée\n"
+                        },
+                        {
+                          "text": "🏠 Étape 4: Clic sur le bouton Accueil\n"
+                        },
+                        {
+                          "text": "✅ Navigation vers accueil effectuée\n"
+                        },
+                        {
+                          "text": "📢 Étape 5: Clic sur le bouton Annonces\n"
+                        },
+                        {
+                          "text": "✅ Navigation vers annonces effectuée\n"
+                        },
+                        {
+                          "text": "➕ Étape 6: Création d'une annonce\n"
+                        },
+                        {
+                          "text": "✅ Annonce créée avec succès\n"
+                        },
+                        {
+                          "text": "📋 Étape 7: Ouverture du kanban de l'annonce\n"
+                        },
+                        {
+                          "text": "   Trouvé 2 éléments pour: text=Annonce Test 1756894639606_2408\n"
+                        },
+                        {
+                          "text": "   ✅ Carte d'annonce trouvée avec: text=Annonce Test 1756894639606_2408\n"
+                        },
+                        {
+                          "text": "✅ Clic sur la carte d'annonce effectué\n"
+                        },
+                        {
+                          "text": "   ✅ Modal Kanban trouvé avec: .fixed.inset-0\n"
+                        },
+                        {
+                          "text": "✅ Kanban de l'annonce ouvert\n"
+                        },
+                        {
+                          "text": "📝 Étape 8: Création d'une card dans l'annonce\n"
+                        },
+                        {
+                          "text": "🎯 Tentative de création de tâche: \"Tâche Test 1756894639606_2408 Annonce\"\n"
+                        },
+                        {
+                          "text": "🔍 Recherche des boutons \"Ajouter rapidement\"...\n"
+                        },
+                        {
+                          "text": "   Trouvé 3 boutons pour: button:has-text(\"Ajouter rapidement\")\n"
+                        },
+                        {
+                          "text": "   ✅ Bouton trouvé avec: button:has-text(\"Ajouter rapidement\")\n"
+                        },
+                        {
+                          "text": "📝 Remplissage de l'input de tâche...\n"
+                        },
+                        {
+                          "text": "   ✅ Input rempli avec: input[placeholder*=\"Titre de la tâche\"]\n"
+                        },
+                        {
+                          "text": "   ✅ Soumission par Entrée\n"
+                        },
+                        {
+                          "text": "✅ Tâche créée avec succès\n"
+                        },
+                        {
+                          "text": "✅ Tâche créée dans l'annonce\n"
+                        },
+                        {
+                          "text": "✏️ Étape 9: Modification de la card\n"
+                        },
+                        {
+                          "text": "🖊️ Tentative de modification de tâche: \"Tâche Test 1756894639606_2408 Annonce\" → \"Tâche Test 1756894639606_2408 Annonce - Modifiée\"\n"
+                        },
+                        {
+                          "text": "🔍 Recherche de la tâche à modifier...\n"
+                        },
+                        {
+                          "text": "   Trouvé 1 éléments pour: text=Tâche Test 1756894639606_2408 Annonce\n"
+                        },
+                        {
+                          "text": "   ✅ Tâche trouvée avec: text=Tâche Test 1756894639606_2408 Annonce\n"
+                        },
+                        {
+                          "text": "👆 Clic sur la tâche...\n"
+                        },
+                        {
+                          "text": "📝 Recherche du champ titre dans le modal...\n"
+                        },
+                        {
+                          "text": "   ✅ Champ titre trouvé avec: input[value*=\"Tâche Test 1756894639606_2408 Annonce\"]\n"
+                        },
+                        {
+                          "text": "   ✅ Titre modifié: \"Tâche Test 1756894639606_2408 Annonce - Modifiée\"\n"
+                        },
+                        {
+                          "text": "💾 Recherche du bouton de sauvegarde...\n"
+                        },
+                        {
+                          "text": "   ✅ Sauvegarde effectuée avec: button:has-text(\"Sauvegarder\")\n"
+                        },
+                        {
+                          "text": "✅ Modification de tâche terminée\n"
+                        },
+                        {
+                          "text": "✅ Tâche modifiée dans l'annonce\n"
+                        },
+                        {
+                          "text": "🗑️ Étape 10: Suppression de la card\n"
+                        },
+                        {
+                          "text": "🗑️ Tentative de suppression de tâche: \"Tâche Test 1756894639606_2408 Annonce - Modifiée\"\n"
+                        },
+                        {
+                          "text": "🔍 Recherche de la tâche à supprimer...\n"
+                        },
+                        {
+                          "text": "   Trouvé 1 éléments pour: text=Tâche Test 1756894639606_2408 Annonce - Modifiée\n"
+                        },
+                        {
+                          "text": "   ✅ Tâche trouvée avec: text=Tâche Test 1756894639606_2408 Annonce - Modifiée\n"
+                        },
+                        {
+                          "text": "🔍 Recherche du bouton de suppression...\n"
+                        },
+                        {
+                          "text": "   ✅ Bouton suppression trouvé avec: button[title*=\"Supprimer\"]\n"
+                        },
+                        {
+                          "text": "✅ Suppression de tâche terminée\n"
+                        },
+                        {
+                          "text": "✅ Tâche supprimée de l'annonce\n"
+                        },
+                        {
+                          "text": "🎉 Workflow annonce terminé avec succès !\n"
+                        },
+                        {
+                          "text": "🔐 Fermeture du modal Kanban...\n"
+                        },
+                        {
+                          "text": "   ✅ Modal fermé avec: button:has(svg)\n"
+                        },
+                        {
+                          "text": "✅ Retour à la liste des annonces\n"
+                        },
+                        {
+                          "text": "🎊 WORKFLOW PARFAIT TERMINÉ - TOUTES LES 10 ÉTAPES RÉUSSIES !\n"
+                        },
+                        {
+                          "text": "📊 Résumé des fonctionnalités testées avec succès:\n"
+                        },
+                        {
+                          "text": "   ✅ Inscription avec génération d'utilisateur unique\n"
+                        },
+                        {
+                          "text": "   ✅ Connexion JWT authentifiée\n"
+                        },
+                        {
+                          "text": "   ✅ Navigation complète (Profil → Accueil → Annonces)\n"
+                        },
+                        {
+                          "text": "   ✅ Création d'annonce via modal\n"
+                        },
+                        {
+                          "text": "   ✅ Ouverture de Kanban modal\n"
+                        },
+                        {
+                          "text": "   ✅ Création de tâche via \"Ajouter rapidement\"\n"
+                        },
+                        {
+                          "text": "   ✅ Modification de tâche via modal TaskEdit\n"
+                        },
+                        {
+                          "text": "   ✅ Suppression de tâche via bouton hover\n"
+                        },
+                        {
+                          "text": "   ✅ Gestion complète des modals et interactions UI\n"
+                        },
+                        {
+                          "text": "   ✅ Gestion d'état et persistance des données\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Créer une annonce",
+                          "duration": 18637
+                        },
+                        {
+                          "title": "Ouvrir le kanban de l'annonce",
+                          "duration": 405
+                        },
+                        {
+                          "title": "Créer une tâche dans l'annonce",
+                          "duration": 5384
+                        },
+                        {
+                          "title": "Modifier la tâche de l'annonce",
+                          "duration": 6631
+                        },
+                        {
+                          "title": "Supprimer la tâche de l'annonce",
+                          "duration": 4765
+                        }
+                      ],
+                      "startTime": "2025-09-03T10:17:18.056Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f23c6fcf0311dc542f04-481c81f733f9c15f6262",
+              "file": "complete-workflow-perfect.spec.js",
+              "line": 15,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-09-03T10:17:14.510Z",
+    "duration": 57179.72,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

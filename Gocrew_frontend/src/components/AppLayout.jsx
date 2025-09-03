@@ -149,17 +149,22 @@ export default function AppLayout() {
 
             {/* Contenu Principal */}
             <div className="flex-1 flex flex-col overflow-hidden">
-                <header className="bg-white shadow-sm p-4 flex justify-end items-center border-b-1 border-b-gray-300">
-                    <div className="flex items-center">
-                        <BellDot className='mr-2' />
+                <header
+                    className="bg-white/90 shadow-lg p-4 flex justify-end items-center border-b border-orange-100 sticky top-0 z-20"
+                    style={{
+                        backdropFilter: "blur(4px)",
+                        WebkitBackdropFilter: "blur(4px)",
+                    }}
+                >
+                    <div className="flex items-center gap-3">
                         <div
-                            className='bg-[#FFA32533] rounded-full w-10 h-10 flex items-center justify-center mr-4 cursor-pointer'
+                            className="bg-gradient-to-tr from-[#FFA325] to-[#FFCB8E] rounded-full w-12 h-12 flex items-center justify-center shadow-lg border-2 border-white hover:scale-105 transition-transform cursor-pointer"
                             onClick={() => navigate("/profil")}
                             title="Voir mon profil"
                         >
-                            <PersonIcon />
+                            <PersonIcon className="w-7 h-7 text-white" />
                         </div>
-                        <span className="mr-4 font-medium">{user.username}</span>
+                        <span className="font-bold text-[#FF6300] text-lg drop-shadow-sm">{user.username}</span>
                     </div>
                 </header>
                 <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#FFA32514] md:p-8 p-4">
