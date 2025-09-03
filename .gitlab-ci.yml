@@ -5,6 +5,7 @@ stages:
   - install_frontend
   - build_backend
   - build_frontend
+  - test_e2e
   - docker_backend
   - docker_frontend
   - docker-compose-up
@@ -35,6 +36,17 @@ install_frontend:
       - Gocrew_frontend/package-lock.json
       - Gocrew_frontend/package.json
 
+install_tests:
+  stage: install_frontend
+  script:
+    - npm install
+    - npx playwright install chromium
+  artifacts:
+    paths:
+      - node_modules
+      - package-lock.json
+    expire_in: 1 hour
+
 build_backend:
   stage: build_backend
   script:
@@ -48,6 +60,51 @@ build_frontend:
   script:
     - cd Gocrew_frontend
     - npm run build
+
+test_e2e:
+  stage: test_e2e
+  image: mcr.microsoft.com/playwright:v1.55.0-jammy
+  services:
+    - postgres:13
+  variables:
+    POSTGRES_DB: gocrew
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: admin
+    DATABASE_URL: "postgresql://postgres:admin@postgres:5432/gocrew"
+    CI: "true"
+  dependencies:
+    - install_tests
+    - install_backend
+    - install_frontend
+  before_script:
+    # Démarrer le backend
+    - cd Gocrew_backend
+    - npm install
+    - npm start &
+    - BACKEND_PID=$!
+    - cd ..
+    # Démarrer le frontend  
+    - cd Gocrew_frontend
+    - npm install
+    - npm run dev &
+    - FRONTEND_PID=$!
+    - cd ..
+    # Attendre que les services soient prêts
+    - sleep 30
+  script:
+    - echo "🧪 Lancement des tests E2E avec Playwright"
+    - npm run test:ci
+  after_script:
+    # Arrêter les services
+    - kill $BACKEND_PID || true
+    - kill $FRONTEND_PID || true
+  artifacts:
+    when: always
+    paths:
+      - test-results/
+      - playwright-report/
+    expire_in: 30 days
+  allow_failure: true
 
 docker-build-backend:
   stage: docker_backend

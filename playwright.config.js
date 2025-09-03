@@ -13,13 +13,13 @@ const config = {
     
     use: {
         baseURL: 'http://localhost:5173',
-        headless: false, // Mode visible pour debug, mettre true pour CI
+        headless: process.env.CI ? true : false, // Mode headless en CI, visible en local
         screenshot: 'only-on-failure',
         video: 'retain-on-failure',
         trace: 'on-first-retry',
         
-        // Ralentir légèrement pour stabilité
-        slowMo: 100,
+        // Ralentir légèrement pour stabilité (seulement en local)
+        slowMo: process.env.CI ? 0 : 100,
         
         // Configuration du navigateur
         viewport: { width: 1280, height: 720 },
