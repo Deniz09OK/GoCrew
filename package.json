@@ -5,7 +5,7 @@
   "scripts": {
     "test": "npx playwright test",
     "test:perfect": "npx playwright test complete-workflow-perfect.spec.js",
-    "test:ci": "npx playwright test complete-workflow-perfect.spec.js --reporter=junit,html",
+    "test:ci": "npx playwright test complete-workflow-perfect.spec.js",
     "start": "node server.js",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",

@@ -8,8 +8,13 @@ const config = {
     expect: {
         timeout: 10000 // Timeout pour les assertions
     },
-    retries: 1, // 1 retry en cas d'échec
+    retries: process.env.CI ? 2 : 1, // Plus de retries en CI
     workers: 1, // Exécution séquentielle pour éviter les conflits de données
+    
+    // Configuration des rapports
+    reporter: process.env.CI 
+        ? [['junit', { outputFile: 'test-results/results.xml' }], ['html']]
+        : 'html',
     
     use: {
         baseURL: 'http://localhost:5173',

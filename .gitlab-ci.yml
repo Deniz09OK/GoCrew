@@ -36,17 +36,6 @@ install_frontend:
       - Gocrew_frontend/package-lock.json
       - Gocrew_frontend/package.json
 
-install_tests:
-  stage: install_frontend
-  script:
-    - npm install
-    - npx playwright install chromium
-  artifacts:
-    paths:
-      - node_modules
-      - package-lock.json
-    expire_in: 1 hour
-
 build_backend:
   stage: build_backend
   script:
@@ -65,38 +54,47 @@ test_e2e:
   stage: test_e2e
   image: mcr.microsoft.com/playwright:v1.55.0-jammy
   services:
-    - postgres:13
+    - name: postgres:13
+      alias: postgres
   variables:
     POSTGRES_DB: gocrew
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: admin
     DATABASE_URL: "postgresql://postgres:admin@postgres:5432/gocrew"
     CI: "true"
-  dependencies:
-    - install_tests
-    - install_backend
-    - install_frontend
   before_script:
-    # Démarrer le backend
+    # Installer les dépendances système
+    - apt-get update && apt-get install -y curl netcat-traditional
+    # Installer les dépendances Node.js du projet racine
+    - npm install
+    # Installer Playwright
+    - npx playwright install chromium
+    # Démarrer le backend en arrière-plan
     - cd Gocrew_backend
     - npm install
-    - npm start &
-    - BACKEND_PID=$!
+    - nohup npm start > backend.log 2>&1 &
+    - sleep 5
     - cd ..
-    # Démarrer le frontend  
-    - cd Gocrew_frontend
+    # Démarrer le frontend en arrière-plan
+    - cd Gocrew_frontend  
     - npm install
-    - npm run dev &
-    - FRONTEND_PID=$!
+    - nohup npm run dev -- --host 0.0.0.0 > frontend.log 2>&1 &
+    - sleep 15
     - cd ..
-    # Attendre que les services soient prêts
-    - sleep 30
+    # Vérifier que les ports sont ouverts
+    - echo "Vérification des ports..."
+    - nc -z localhost 3000 && echo "✅ Backend port 3000 OK" || echo "❌ Backend port 3000 KO"
+    - nc -z localhost 5173 && echo "✅ Frontend port 5173 OK" || echo "❌ Frontend port 5173 KO"
   script:
     - echo "🧪 Lancement des tests E2E avec Playwright"
     - npm run test:ci
   after_script:
-    # Arrêter les services
-    - kill $BACKEND_PID || true
+    - echo "📋 Logs du backend:"
+    - cat Gocrew_backend/backend.log || true
+    - echo "📋 Logs du frontend:"  
+    - cat Gocrew_frontend/frontend.log || true
+    - pkill -f "npm start" || true
+    - pkill -f "npm run dev" || true
     - kill $FRONTEND_PID || true
   artifacts:
     when: always
