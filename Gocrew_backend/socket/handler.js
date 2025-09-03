@@ -14,18 +14,17 @@ let messages = [];
 io.on("connection", (socket) => {
     console.log("✅ Un utilisateur connecté");
 
-    // Envoi de l'historique au nouvel utilisateur
-    socket.emit("chat_history", messages);
+    socket.emit("chat_history", messages); // Envoi de l'historique au nouvel utilisateur
 
     // Réception d'un message
     socket.on("send_message", (msg) => {
         console.log("Message reçu:", msg);
 
         // Sauvegarde du message dans l'historique
-        messages.push(msg);
+        messages.push(msg); // ajoute le message à l'historique
 
         // Diffuse le message à tout le monde
-        io.emit("receive_message", msg);
+        io.emit("receive_message", msg); // diffuse à tous les clients connectés
     });
 
     socket.on("disconnect", () => {
@@ -33,6 +32,6 @@ io.on("connection", (socket) => {
     });
 });
 
-server.listen(4000, () => {
+server.listen(3000, () => {
     console.log("🚀 Serveur socket.io sur http://localhost:3000");
 });

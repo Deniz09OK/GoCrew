@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { User, Mail, Calendar } from "lucide-react";
+import { User, Mail } from "lucide-react";
 
 export default function UserProfile({ user }) {
     return (
@@ -43,15 +43,6 @@ export default function UserProfile({ user }) {
                             <div className="flex items-center text-gray-700">
                                 <Mail className="w-5 h-5 mr-2 text-gray-500" />
                                 <span>{user.email}</span>
-                            </div>
-                            <div className="flex items-center text-gray-700">
-                                <Calendar className="w-5 h-5 mr-2 text-gray-500" />
-                                <span>
-                                    Membre depuis{" "}
-                                    {user.created_at
-                                        ? new Date(user.created_at).toLocaleDateString()
-                                        : "date inconnue"}
-                                </span>
                             </div>
                         </div>
                     </div>

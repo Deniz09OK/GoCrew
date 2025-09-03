@@ -3,25 +3,25 @@ import { io } from "socket.io-client";
 import MessageBubble from "../components/MessageBubble";
 import MessageInput from "../components/MessageInput";
 import { motion } from "framer-motion";
+import { useAuth } from "../context/AuthContext"; // si tu utilises le contexte
 
 
 const socket = io("http://localhost:3000");
 
 export default function Messages() {
+    const { user } = useAuth(); // user = { id, username, ... }
     const [messages, setMessages] = useState([]);
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
-        // Charger l'historique
         socket.on("chat_history", (history) => {
+            console.log("chat_history", history);
             setMessages(history);
         });
-
-        // Nouveaux messages en temps réel
         socket.on("receive_message", (msg) => {
-            setMessages((prev) => [...prev, msg]);
+            console.log("receive_message", msg);
+            setMessages(prev => [...prev, msg]);
         });
-
         return () => {
             socket.off("chat_history");
             socket.off("receive_message");
@@ -34,10 +34,12 @@ export default function Messages() {
     }, [messages]);
 
     const handleSend = (text) => {
+        if (!user) return;
         const msg = {
             text,
             time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-            sender: "me",
+            senderId: user.id,
+            senderName: user.username,
         };
         setMessages((prev) => [...prev, msg]); // Update local state immediately
         socket.emit("send_message", msg);
@@ -69,7 +71,8 @@ export default function Messages() {
                                 key={i}
                                 text={m.text}
                                 time={m.time}
-                                isSender={m.sender === "me"}
+                                isSender={m.senderId === user.id}
+                                senderName={m.senderName}
                             />
                         ))}
                         {/* Référence pour scroll auto */}
