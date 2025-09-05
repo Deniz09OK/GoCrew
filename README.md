@@ -29,7 +29,7 @@ Elle centralise l’organisation de voyages en groupe dans une interface unique 
 - `tests/` → Scripts de tests automatisés  
 
 ## 👥 Équipe
-Projet réalisé en équipe dans le cadre du **projet de fin d’année Pré-MSc à Epitech** :  
+Projet réalisé en équipe dans le cadre du **projet de fin d’année en Pré-MSc à Epitech** :  
 - [Deniz OK](https://github.com/Deniz09OK)  
 - [Anne-Charlotte GI](https://github.com/Annecha-gi)  
 
