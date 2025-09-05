@@ -33,7 +33,6 @@ Projet réalisé en équipe dans le cadre du **projet de fin d’année en Pré-
 - [Anne-Charlotte GI](https://github.com/Annecha-gi)  
 
 ## 🔗 Liens
-- [Repo GitLab (original)](https://gitlab.com/gocrew-group/GoCrew-project)  
 - [Repo GitHub (miroir)](https://github.com/Deniz09OK/GoCrew)  
 
 ---
