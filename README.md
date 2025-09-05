@@ -13,7 +13,6 @@ Elle centralise l’organisation de voyages en groupe dans une interface unique 
 - **Conformité RGPD** : données sécurisées et protégées.  
 
 ## 🛠️ Stack technique
-## 🛠️ Stack technique
 - **Frontend** : [React.js](https://react.dev/), [Vite](https://vitejs.dev/), [TailwindCSS](https://tailwindcss.com/)  
 - **Backend** : [Node.js](https://nodejs.org/), [Express.js](https://expressjs.com/)  
 - **Base de données** : [PostgreSQL](https://www.postgresql.org/)  
