@@ -29,6 +29,7 @@ Elle centralise l’organisation de voyages en groupe dans une interface unique 
 
 ## 👥 Équipe
 Projet réalisé en équipe dans le cadre du **projet de fin d’année en Pré-MSc à Epitech** :  
-- [Deniz OK](https://github.com/Deniz09OK)  
-- [Anne-Charlotte GI](https://github.com/Annecha-gi)  
+- [Deniz](https://github.com/Deniz09OK)  
+- [Anne-Charlotte](https://github.com/Annecha-gi)
+  [Luc](https://github.com/lucahon21)
 
