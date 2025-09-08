@@ -32,7 +32,3 @@ Projet réalisé en équipe dans le cadre du **projet de fin d’année en Pré-
 - [Deniz OK](https://github.com/Deniz09OK)  
 - [Anne-Charlotte GI](https://github.com/Annecha-gi)  
 
-## 🔗 Liens
-- [Repo GitHub (miroir)](https://github.com/Deniz09OK/GoCrew)  
-
----
